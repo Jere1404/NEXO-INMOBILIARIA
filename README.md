@@ -107,3 +107,7 @@ Auth admite sesiones en el fragmento de los enlaces predeterminados de invitaci�
 ## V5B.2 — gestión de propiedades, pendiente de revisión
 
 El panel permite crear borradores, editar datos y comodidades, publicar, despublicar y archivar sin eliminar registros. El guardado transaccional utiliza la migración adicional de V5B.2, ya aplicada y verificada manualmente en Supabase por el responsable; no se ejecuta automáticamente ni debe repetirse en ese proyecto. Conserva RLS y detecta conflictos de versión. El catálogo público sigue usando su JSON y no se implementa carga de imágenes. Ver [implementación, instalación y pruebas de V5B.2](docs/ADMIN-PROPIEDADES-V5B2.md).
+
+## V5B.3 — formulario y ubicaciones, pendiente de revisión
+
+El editor organiza la información en secciones con estilos propios versionados y permite elegir provincia/localidad/zona, además de guardar nuevas localidades y zonas reutilizables mediante Supabase. La migración independiente `202610240003_v5b3_locations.sql` ya fue aplicada y verificada manualmente en Supabase por el responsable; no debe repetirse en ese proyecto y conserva las propiedades existentes. No cambia la autenticación ni el catálogo público. Ver [diagnóstico, migración y pruebas de V5B.3](docs/ADMIN-UBICACIONES-V5B3.md).

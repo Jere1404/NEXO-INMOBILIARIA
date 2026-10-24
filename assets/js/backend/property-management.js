@@ -42,13 +42,15 @@ export function createPropertyManager(client) {
     async open(id) {
       const user = await authorize();
       const results = await Promise.all([
-        client.from('zones').select('slug,name').order('name'),
         client.from('amenities').select('slug,name').order('name'),
         ...(id ? [client.from('properties').select('*').eq('id',id).maybeSingle(),client.from('property_amenities').select('amenity_slug').eq('property_id',id)] : []),
       ]);
       if (results.some(r=>r.error)) throw new Error('No pudimos cargar los datos de edición. Intentá nuevamente.');
-      if (id && !results[2].data) throw new Error('La propiedad no existe o ya no está disponible.');
-      return {user,zones:results[0].data,amenities:results[1].data,property:id?results[2].data:null,selected:id?results[3].data.map(a=>a.amenity_slug):[]};
+      if (id && !results[1].data) throw new Error('La propiedad no existe o ya no está disponible.');
+      const property = id ? results[1].data : null;
+      const zone = property ? await client.from('zones').select('slug,name,locality_id').eq('slug',property.zone_slug).single() : null;
+      if (zone && (zone.error || !zone.data)) throw new Error('No pudimos cargar la zona. Revisá la migración V5B.3.');
+      return {user,zones:zone?[zone.data]:[],amenities:results[0].data,property,selected:id?results[2].data.map(a=>a.amenity_slug):[]};
     },
     async save(input, context) {
       await authorize();

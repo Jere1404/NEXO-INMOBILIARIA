@@ -1,17 +1,19 @@
 import { getAdminClient } from './supabase-client.js';
 import { createAdminAuth } from '../backend/auth.js';
 import { AdminAccessDenied, propertyStatuses } from '../backend/admin-properties.js';
-import { createPropertyManager, PropertyConflict } from '../backend/property-management.js';
+import { createPropertyManager, PropertyConflict } from '../backend/property-management.js?v=v5b3';
+import { createLocationRepository } from '../backend/locations.js';
+import { createLocationFields } from './location-fields.js';
 
 const $ = id => document.getElementById(id);
 const fields = ['public_code','title','description','property_type','operation','status','price','currency','zone_slug','city','area','bedrooms','bathrooms','approximate_location'];
-let client, auth, manager, context, dirty = false, saving = false, generation = 0, blocked = false;
+let client, auth, manager, locationFields, context, locationsBusy = false, dirty = false, saving = false, generation = 0, blocked = false;
 let id = new URLSearchParams(location.search).get('id');
 const newCode = `nexo-${crypto.randomUUID()}`;
 function message(text) { $('editor-message').textContent = text; }
 function conceal() { $('property-form').hidden = true; $('admin-session').hidden = true; }
 function denied(error) {
-  generation++; context = null; dirty = false; conceal(); $('property-form').reset(); $('amenity-options').replaceChildren();
+  generation++; context = null; dirty = false; locationFields?.reset(); locationsBusy = false; conceal(); $('property-form').reset(); $('amenity-options').replaceChildren();
   $('editor-title').textContent = 'Acceso no disponible';
   message(error instanceof AdminAccessDenied ? 'Iniciá sesión con una cuenta administrativa habilitada.' : error.message || 'No pudimos comprobar el acceso.');
   $('editor-login').hidden = false; $('editor-retry').hidden = false;
@@ -24,7 +26,8 @@ function input() {
   return result;
 }
 function refreshControls() {
-  $('editor-fields').disabled = saving || blocked;
+  $('editor-fields').disabled = saving || blocked || locationsBusy;
+  $('save-property').disabled = !context || !locationFields?.ready();
   $('status').disabled = !context?.property;
   const land = $('property_type').value === 'terreno';
   $('bedrooms').disabled = land; $('bathrooms').disabled = land;
@@ -44,11 +47,10 @@ async function open() {
     if (run !== generation) return;
     context = loaded; blocked = false; dirty = false;
     $('editor-title').textContent = id ? 'Editar propiedad' : 'Nueva propiedad';
-    $('zone_slug').replaceChildren();
-    for (const zone of context.zones) { const option = document.createElement('option'); option.value = zone.slug; option.textContent = zone.name; $('zone_slug').append(option); }
     const row = context.property || {public_code:newCode,city:'Corrientes Capital',status:'draft',property_type:'casa',operation:'venta',currency:'USD',is_demo:true};
     for (const field of fields) $(field).value = row[field] ?? '';
-    if (!id && context.zones[0]) $('zone_slug').value = context.zones[0].slug;
+    await locationFields.mount(context.zones[0]);
+    if (run !== generation) return;
     $('featured').checked = !!row.featured; $('is_demo').checked = !!row.is_demo;
     $('amenity-options').replaceChildren();
     for (const amenity of context.amenities) {
@@ -68,7 +70,7 @@ async function revalidate() {
   catch (error) { if (run === generation) denied(error); }
 }
 async function save(event) {
-  event.preventDefault(); if (saving || blocked || !context) return;
+  event.preventDefault(); if (saving || blocked || locationsBusy || !context || !locationFields.ready()) return;
   const data = input();
   const oldStatus = context.property?.status || 'draft';
   if (data.status !== oldStatus) {
@@ -102,6 +104,10 @@ async function logout() {
 function init() {
   try { client = getAdminClient(); auth = createAdminAuth(client); manager = createPropertyManager(client); }
   catch { denied(new Error('No pudimos iniciar la conexión.')); return; }
+  locationFields = createLocationFields(createLocationRepository(client),{
+    onChange:({zones,city})=>{if(context){context.zones=zones;$('city').value=city;}refreshControls();},
+    onBusy:value=>{locationsBusy=value;refreshControls();},onDenied:denied,
+  });
   $('property-form').addEventListener('submit',save);
   $('property-form').addEventListener('input',()=>{dirty = true;});
   $('property_type').addEventListener('change',()=>{

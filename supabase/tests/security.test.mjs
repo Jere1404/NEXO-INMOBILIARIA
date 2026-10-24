@@ -27,6 +27,16 @@ test('PostgreSQL migrations, constraints, idempotent import and RLS', async t =>
   assert.equal((await db.query('select count(*)::int n from property_images')).rows[0].n,12);
   assert.deepEqual((await db.query('select property_type,count(*)::int n from properties group by property_type order by property_type')).rows,
     [{property_type:'casa',n:4},{property_type:'departamento',n:5},{property_type:'terreno',n:3}]);
+  const beforeLocations = (await db.query('select * from properties order by public_code')).rows;
+  const beforeImages = (await db.query('select * from property_images order by id')).rows;
+  const beforeLinks = (await db.query('select * from property_amenities order by property_id,amenity_slug')).rows;
+  const beforeZones = (await db.query('select slug,name from zones order by slug')).rows;
+  await db.exec(await readFile(new URL('../migrations/202610240003_v5b3_locations.sql', import.meta.url),'utf8'));
+  await db.exec(seed); // Existing import remains compatible and idempotent after the additive migration.
+  assert.deepEqual((await db.query('select * from properties order by public_code')).rows,beforeLocations);
+  assert.deepEqual((await db.query('select * from property_images order by id')).rows,beforeImages);
+  assert.deepEqual((await db.query('select * from property_amenities order by property_id,amenity_slug')).rows,beforeLinks);
+  assert.deepEqual((await db.query('select slug,name from zones order by slug')).rows,beforeZones);
   await db.query('insert into admin_memberships(user_id) values ($1)',[admin]);
   const asRole = async (role, uid = '') => {
     await db.exec('reset role');
@@ -114,6 +124,68 @@ test('PostgreSQL migrations, constraints, idempotent import and RLS', async t =>
     assert.equal(await count('property_images'),12);
     await db.query("delete from properties where public_code='rpc-property'");
   });
+  const createLocation = async (province,locality,zone) => (await db.query('select * from public.admin_create_location($1,$2,$3)',[province,locality,zone])).rows[0];
+  await t.test('location references are readable, but anonymous and non-admin creation is denied',async()=>{
+    await asRole('anon');assert.equal(await count('provinces'),24);assert.equal(await count('localities'),1);
+    await denied(()=>createLocation('18','Goya','Centro'));
+    await denied(()=>db.query("insert into localities(province_code,name) values ('18','Goya')"));
+    await asRole('authenticated',other);
+    await denied(()=>createLocation('18','Goya','Centro'));
+    await denied(()=>db.query("insert into localities(province_code,name) values ('18','Goya')"));
+  });
+  await t.test('SECURITY INVOKER zone INSERT and conflict reuse work without UPDATE privileges or RLS bypass',async()=>{
+    await asRole('postgres');
+    const signature='public.admin_create_location(text,text,text)';
+    const metadata=(await db.query("select prosecdef from pg_proc where oid=$1::regprocedure",[signature])).rows[0];
+    assert.equal(metadata.prosecdef,false);
+    assert.equal((await db.query("select has_function_privilege('anon',$1,'EXECUTE') allowed",[signature])).rows[0].allowed,false);
+    assert.equal((await db.query("select has_function_privilege('authenticated',$1,'EXECUTE') allowed",[signature])).rows[0].allowed,true);
+    await db.exec('revoke update,delete on public.zones from authenticated');
+    let created;
+    try {
+      await asRole('authenticated',admin);
+      const role=(await db.query('select current_user as name,rolsuper,rolbypassrls from pg_roles where rolname=current_user')).rows[0];
+      assert.equal(role.name,'authenticated');assert.equal(role.rolsuper,false);assert.equal(role.rolbypassrls,false);
+      const permissions=(await db.query("select has_table_privilege(current_user,'public.zones','INSERT') can_insert,has_table_privilege(current_user,'public.zones','SELECT') can_select,has_table_privilege(current_user,'public.zones','UPDATE') can_update")).rows[0];
+      assert.deepEqual(permissions,{can_insert:true,can_select:true,can_update:false});
+      const before=(await db.query('select * from public.zones order by slug')).rows;
+      const existing=await createLocation('18','  CORRIENTES   CAPITAL  ','  CENTRO  ');
+      assert.equal(existing.slug,'centro');
+      assert.deepEqual((await db.query('select * from public.zones order by slug')).rows,before);
+      created=await createLocation('18','Corrientes Capital','Prueba permisos');
+      assert.equal(created.locality_id,existing.locality_id);
+      assert.equal((await createLocation('18','Corrientes Capital','prueba permisos')).slug,created.slug);
+      await asRole('authenticated',other);await denied(()=>createLocation('18','Corrientes Capital','Centro'));
+      await asRole('anon');await denied(()=>createLocation('18','Corrientes Capital','Centro'));
+    } finally {
+      await asRole('postgres');await db.exec('grant update,delete on public.zones to authenticated');
+      if(created)await db.query('delete from public.zones where slug=$1',[created.slug]);
+      await asRole('authenticated',admin);
+    }
+  });
+  await t.test('admin creates reusable locations across provinces without duplicate names or slugs',async()=>{
+    await asRole('authenticated',admin);
+    const zone=await createLocation('82','Rosario','Centro');
+    const same=await createLocation('82','  ROSARIO  ','  centro  ');
+    assert.equal(zone.slug,same.slug);assert.equal(zone.locality_id,same.locality_id);
+    assert.notEqual(zone.slug,'centro');
+    assert.equal((await db.query("select count(*)::int n from localities where province_code='82'")).rows[0].n,1);
+    const goya=await createLocation('18','Goya','Centro');assert.notEqual(goya.slug,zone.slug);
+    await assert.rejects(()=>createLocation('99','Rosario','Centro'),e=>e.code==='23503');
+    await assert.rejects(()=>createLocation('18',' ','Centro'),e=>e.code==='22023');
+    await assert.rejects(()=>createLocation('18','Goya','x'.repeat(101)),e=>e.code==='22023');
+  });
+  await t.test('property locality must match its zone and existing location identifiers cannot move',async()=>{
+    await asRole('authenticated',admin);
+    const zone=await createLocation('82','Rosario','Centro');
+    await assert.rejects(()=>save(null,null,{...payload,public_code:'location-test',zone_slug:zone.slug,city:'Corrientes Capital'}),e=>e.code==='23514');
+    const row=await save(null,null,{...payload,public_code:'location-test',zone_slug:zone.slug,city:'Rosario'});
+    assert.equal(row.city,'Rosario');assert.equal(row.zone_slug,zone.slug);
+    await assert.rejects(()=>db.query("update zones set locality_id='00000000-0000-4000-8000-000000000018' where slug=$1",[zone.slug]),e=>e.code==='23514');
+    await denied(()=>db.query("update localities set name='Changed' where id=$1",[zone.locality_id]));
+    await db.query('delete from properties where id=$1',[row.id]);
+    assert.equal(await count('properties'),12);assert.equal(await count('property_images'),12);
+  });
   await t.test('pending images and revoked administrator remain protected', async () => {
     await asRole('authenticated',admin);
     await db.exec("update properties set status='published' where public_code='nexo-001'; update property_images set processing_status='pending' where property_id=(select id from properties where public_code='nexo-001')");
@@ -122,5 +194,16 @@ test('PostgreSQL migrations, constraints, idempotent import and RLS', async t =>
     await asRole('authenticated',admin);assert.equal(await count('properties'),1);assert.equal((await db.query("update properties set status='archived' returning id")).rows.length,0);
     await denied(()=>db.exec('update admin_memberships set enabled=true'));
     await denied(()=>save(null,null,{...payload,public_code:'rpc-revoked'}));
+    await denied(()=>createLocation('18','Goya','Denied'));
   });
+});
+
+test('V5B.3 aborts on unexpected legacy cities instead of remapping property data',async t=>{
+  const db=new PGlite();t.after(()=>db.close());
+  await db.exec("create table public.properties(city text); insert into public.properties values ('Rosario');");
+  const sql=await readFile(new URL('../migrations/202610240003_v5b3_locations.sql',import.meta.url),'utf8');
+  await assert.rejects(()=>db.exec(sql),/Review legacy city values/);
+  await db.exec('rollback');
+  assert.deepEqual((await db.query('select * from properties')).rows,[{city:'Rosario'}]);
+  assert.equal((await db.query("select to_regclass('public.provinces') as table_name")).rows[0].table_name,null);
 });
