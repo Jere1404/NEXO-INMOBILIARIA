@@ -240,3 +240,6 @@ h1 { font-size: clamp(36px, 5.1vw, 68px); line-height: 1.12; letter-spacing: -.0
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
+
+.property-details-link { display: inline-flex; align-self: flex-start; align-items: center; min-height: 44px; margin-top: 14px; color: #1d63b0; font-size: 13px; font-weight: 700; text-underline-offset: 4px; }
+.property-details-link:hover { color: var(--navy); }

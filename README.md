@@ -6,7 +6,7 @@ Proyecto de portfolio y demostración comercial para una inmobiliaria ficticia d
 
 ## Estado actual
 
-**Etapa 3B: búsqueda y filtros implementados, pendientes de revisión.** El catálogo contiene 12 propiedades ficticias. Permite combinar operación, tipo, zona, moneda, precios, habitaciones, baños, superficie y comodidades, además de ordenar y restablecer la búsqueda. El inicio conserva sus seis destacadas y su buscador. Nosotros, Servicios y Contacto siguen siendo provisionales.
+**V4: fichas individuales implementadas, pendientes de revisión.** Una plantilla carga cada propiedad por ID, conserva las imágenes existentes, muestra la descripción y características del JSON y recomienda hasta tres similares. Las tarjetas de inicio y catálogo incluyen enlaces a las fichas. WhatsApp queda preparado sin número configurado: el botón está deshabilitado y el mensaje se puede revisar. No se inventan ambientes ni características. Ver [documentación de V4](docs/FICHAS-PROPIEDADES.md).
 
 El alcance, la identidad visual, la navegación, la estructura de archivos propuesta y los criterios de finalización están en [docs/PLAN-MAESTRO.md](docs/PLAN-MAESTRO.md).
 
@@ -36,7 +36,7 @@ Los inmuebles y sus datos serán ficticios y se identificarán como demostració
 
 ## Flujo de trabajo
 
-El desarrollo de esta etapa se realiza exclusivamente en `feature/nexo-catalogo`. No se realizan commits, push, Pull Requests ni merges automáticos. El siguiente paso requiere aprobación explícita del responsable del proyecto.
+El desarrollo de esta etapa se realiza exclusivamente en `feature/nexo-v4-fichas`. No se realizan commits, push, Pull Requests ni merges automáticos. El siguiente paso requiere aprobación explícita del responsable del proyecto.
 
 ## Datos del catálogo
 
@@ -50,7 +50,7 @@ Cada registro usa `id`, `titulo`, `tipo`, `operacion`, `zona` (valor de URL), `u
 - `ubicacionAproximada` es una referencia barrial textual, sin direcciones exactas, coordenadas de viviendas ni mapas.
 - No hay fotografías autorizadas: `imagen` con metadatos pendientes y `fotografias: []`. No se atribuyen licencias supuestas. El catálogo muestra placeholders identificados como “Fotografía pendiente”.
 
-`assets/js/property-cards.js` comparte carga, validación básica y representación de tarjetas entre `home.js` y `propiedades.js`, mediante módulos nativos. Las tarjetas son informativas, sin botones ni enlaces a fichas individuales. No se implementan fichas individuales, WhatsApp ni otras funcionalidades posteriores.
+`assets/js/property-cards.js` comparte carga, validación básica y representación de tarjetas entre `home.js` y `propiedades.js`, mediante módulos nativos. Las tarjetas enlazan a la plantilla individual. WhatsApp está preparado sin destino configurado; no se envían consultas.
 
 `assets/js/catalog-filters.js` separa el análisis de parámetros, validación, filtrado, ordenamiento y serialización de la interfaz en `propiedades.js`. La lógica no modifica el JSON original.
 
