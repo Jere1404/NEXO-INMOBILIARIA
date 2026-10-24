@@ -7,11 +7,12 @@
   <meta name="robots" content="noindex, nofollow">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https://*.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'">
   <title>Editar propiedad | NEXO Inmobiliaria</title>
-  <link rel="stylesheet" href="../assets/css/styles.css">
-  <link rel="stylesheet" href="../assets/css/admin-panel.css">
-  <script type="module" src="../assets/js/admin/property-editor.js"></script>
+  <link rel="stylesheet" href="../assets/css/styles.css?v=v5b3">
+  <link rel="stylesheet" href="../assets/css/admin-panel.css?v=v5b3">
+  <link rel="stylesheet" href="../assets/css/admin-editor.css?v=v5b3">
+  <script type="module" src="../assets/js/admin/property-editor.js?v=v5b3"></script>
 </head>
-<body>
+<body class="property-editor-page">
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header class="panel-header"><div class="container panel-header-inner"><a class="brand" href="../index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a><a class="public-site-link" href="../index.html">Ver sitio público</a><div id="admin-session" class="panel-session" hidden><span id="admin-identity"></span><button id="admin-logout" class="secondary-button" type="button">Cerrar sesión</button></div></div></header>
   <main id="contenido" class="container panel-main" tabindex="-1">
@@ -22,27 +23,44 @@
     <button id="editor-retry" class="secondary-button" type="button" hidden>Volver a cargar datos</button>
     <form id="property-form" hidden>
       <fieldset id="editor-fields" disabled><legend class="sr-only">Información de la propiedad</legend>
-        <div class="editor-grid">
-          <div class="editor-wide"><label for="title">Título</label><input id="title" name="title" required maxlength="200"></div>
-          <div><label for="public_code">Código público (permanente)</label><input id="public_code" name="public_code" readonly required></div>
-          <div><label for="status">Estado</label><select id="status" name="status"><option value="draft">Borrador</option><option value="published">Publicada</option><option value="archived">Archivada</option></select></div>
-          <div><label for="property_type">Tipo</label><select id="property_type" name="property_type"><option value="casa">Casa</option><option value="departamento">Departamento</option><option value="terreno">Terreno</option></select></div>
-          <div><label for="operation">Operación</label><select id="operation" name="operation"><option value="venta">Venta</option><option value="alquiler">Alquiler</option></select></div>
-          <div><label for="price">Precio</label><input id="price" name="price" type="number" inputmode="decimal" min="0.01" max="999999999999.99" step="0.01" required></div>
-          <div><label for="currency">Moneda</label><select id="currency" name="currency"><option value="USD">USD</option><option value="ARS">ARS</option></select></div>
-          <div><label for="zone_slug">Zona</label><select id="zone_slug" name="zone_slug" required></select></div>
-          <div><label for="city">Ciudad</label><input id="city" name="city" required maxlength="100"></div>
-          <div class="editor-wide"><label for="approximate_location">Ubicación aproximada</label><textarea id="approximate_location" name="approximate_location" rows="2" required maxlength="1000" aria-describedby="location-help"></textarea><p id="location-help" class="panel-note">Usá una referencia de zona. No incluyas direcciones privadas de viviendas reales en esta demostración.</p></div>
-          <div><label for="area">Superficie (m²)</label><input id="area" name="area" type="number" inputmode="decimal" min="0.01" max="9999999999.99" step="0.01" required></div>
-          <div><label for="bedrooms">Habitaciones (opcional)</label><input id="bedrooms" name="bedrooms" type="number" inputmode="numeric" min="0" max="32767" step="1"></div>
-          <div><label for="bathrooms">Baños (opcional)</label><input id="bathrooms" name="bathrooms" type="number" inputmode="numeric" min="0" max="32767" step="1"></div>
-          <p id="rooms-help" class="panel-note">Vacío significa sin informar; los terrenos no admiten habitaciones ni baños.</p>
-          <div class="editor-wide"><label for="description">Descripción</label><textarea id="description" name="description" rows="7" required maxlength="20000"></textarea></div>
-        </div>
-        <fieldset class="editor-amenities"><legend>Comodidades</legend><div id="amenity-options"></div></fieldset>
-        <label class="checkbox-label"><input id="featured" name="featured" type="checkbox"> Destacada</label>
-        <label class="checkbox-label"><input id="is_demo" name="is_demo" type="checkbox"> Propiedad ficticia de demostración</label>
-        <p class="panel-note">No se cargan imágenes en esta etapa. Publicar habilita la lectura en la API de Supabase; el catálogo público del sitio mantiene su JSON actual.</p>
+        <fieldset class="editor-section"><legend>Información principal</legend><p class="section-help">Identificá el inmueble y definí su operación. El código público se conserva permanentemente.</p>
+          <div class="editor-grid">
+            <div class="editor-wide"><label for="title">Título</label><input id="title" name="title" required maxlength="200" autocomplete="off"></div>
+            <div><label for="public_code">Código público</label><input id="public_code" name="public_code" readonly required></div>
+            <div><label for="status">Estado</label><select id="status" name="status"><option value="draft">Borrador</option><option value="published">Publicada</option><option value="archived">Archivada</option></select></div>
+            <div><label for="property_type">Tipo</label><select id="property_type" name="property_type"><option value="casa">Casa</option><option value="departamento">Departamento</option><option value="terreno">Terreno</option></select></div>
+            <div><label for="operation">Operación</label><select id="operation" name="operation"><option value="venta">Venta</option><option value="alquiler">Alquiler</option></select></div>
+            <div><label for="price">Precio</label><input id="price" name="price" type="number" inputmode="decimal" min="0.01" max="999999999999.99" step="0.01" required></div>
+            <div><label for="currency">Moneda</label><select id="currency" name="currency"><option value="USD">USD</option><option value="ARS">ARS</option></select></div>
+          </div>
+        </fieldset>
+        <fieldset class="editor-section"><legend>Ubicación</legend><p class="section-help">Elegí provincia, localidad y barrio. Las nuevas ubicaciones se guardan para reutilizarlas.</p>
+          <div class="editor-grid">
+            <div><label for="province">Provincia</label><select id="province" name="province" required></select></div>
+            <div><label for="locality">Localidad</label><select id="locality" name="locality" required></select></div>
+            <div id="new-locality-wrap" hidden><label for="new_locality">Nombre de la nueva localidad</label><input id="new_locality" name="new_locality" maxlength="100" autocomplete="off" disabled></div>
+            <div><label for="zone_slug">Barrio o zona</label><select id="zone_slug" name="zone_slug" required></select></div>
+            <div id="new-zone-wrap" hidden><label for="new_zone">Nombre del nuevo barrio o zona</label><input id="new_zone" name="new_zone" maxlength="100" autocomplete="off" disabled></div>
+            <div class="editor-wide location-actions"><button id="create-location" class="secondary-button" type="button" hidden>Guardar barrio o zona</button><button id="location-retry" class="secondary-button" type="button" hidden>Reintentar ubicaciones</button><p id="location-message" role="status" aria-live="polite"></p></div>
+            <div class="editor-wide"><label for="approximate_location">Ubicación aproximada</label><textarea id="approximate_location" name="approximate_location" rows="2" required maxlength="1000" aria-describedby="location-help"></textarea><p id="location-help" class="section-help">Una referencia independiente del barrio. No incluyas direcciones privadas de viviendas reales en esta demostración.</p></div>
+          </div>
+          <input id="city" name="city" type="hidden">
+        </fieldset>
+        <fieldset class="editor-section"><legend>Características</legend>
+          <div class="editor-grid">
+            <div><label for="area">Superficie (m²)</label><input id="area" name="area" type="number" inputmode="decimal" min="0.01" max="9999999999.99" step="0.01" required></div>
+            <div><label for="bedrooms">Habitaciones (opcional)</label><input id="bedrooms" name="bedrooms" type="number" inputmode="numeric" min="0" max="32767" step="1" aria-describedby="rooms-help"></div>
+            <div><label for="bathrooms">Baños (opcional)</label><input id="bathrooms" name="bathrooms" type="number" inputmode="numeric" min="0" max="32767" step="1" aria-describedby="rooms-help"></div>
+            <p id="rooms-help" class="section-help">Vacío significa sin informar. Los terrenos no admiten habitaciones ni baños.</p>
+          </div>
+          <fieldset class="editor-amenities"><legend>Comodidades</legend><div id="amenity-options"></div></fieldset>
+        </fieldset>
+        <fieldset class="editor-section"><legend>Descripción y publicación</legend>
+          <div class="editor-grid"><div class="editor-wide"><label for="description">Descripción</label><textarea id="description" name="description" rows="6" required maxlength="20000"></textarea></div></div>
+          <label class="checkbox-label"><input id="featured" name="featured" type="checkbox"> Destacada</label>
+          <label class="checkbox-label"><input id="is_demo" name="is_demo" type="checkbox"> Propiedad ficticia de demostración</label>
+          <p class="section-help">No se cargan imágenes en esta etapa. Publicar habilita la lectura en la API de Supabase; el catálogo público mantiene su JSON actual.</p>
+        </fieldset>
         <div class="editor-actions"><button id="save-property" class="button" type="submit">Guardar borrador</button><a id="cancel-edit" href="index.html">Volver al listado</a></div>
       </fieldset>
     </form>

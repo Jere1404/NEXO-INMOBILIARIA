@@ -1,0 +1,25 @@
+/* Dedicated editor asset: independently versioned in admin/propiedad.html. */
+.property-editor-page #editor-title { font-size: clamp(30px, 4vw, 46px); margin-block: 30px 12px; }
+#editor-message { max-width: 850px; font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+#property-form { margin-block: 28px; max-width: 1000px; }
+#editor-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.editor-section { min-width: 0; margin: 0 0 26px; padding: 20px; background: #fff; border: 1px solid #dce2e9; border-radius: 10px; }
+.editor-section > legend { padding: 0 10px; font-weight: 700; font-size: 18px; color: #142d4e; }
+.section-help { margin: 0 0 20px; color: #526174; font-size: 12px; line-height: 1.8; }
+.editor-grid { display: grid; gap: 20px; }
+.editor-grid > div { min-width: 0; }
+.editor-grid label { display: block; margin-bottom: 9px; font-size: 13px; font-weight: 700; color: #142d4e; }
+.editor-grid input, .editor-grid select, .editor-grid textarea { box-sizing: border-box; width: 100%; min-width: 0; min-height: 48px; padding: 12px; font: inherit; font-size: 16px; color: #142d4e; background: #fff; border: 1px solid #aabace; border-radius: 6px; }
+.editor-grid textarea { resize: vertical; line-height: 1.65; }
+.editor-grid input[readonly], .editor-grid select:disabled { background: #f3f5f7; }
+.editor-grid input:focus-visible, .editor-grid select:focus-visible, .editor-grid textarea:focus-visible { outline: 3px solid #2878d0; outline-offset: 3px; }
+.editor-grid .section-help { margin-top: 8px; margin-bottom: 0; }
+.editor-amenities { margin: 24px 0 0; padding: 16px; border: 1px solid #dce2e9; border-radius: 6px; min-width: 0; }
+.editor-amenities legend { padding-inline: 6px; font-size: 14px; font-weight: 600; }
+#amenity-options { display: grid; gap: 6px; }
+.checkbox-label { display: flex; align-items: center; gap: 12px; min-height: 46px; font-size: 14px; }
+.checkbox-label input { width: 20px; height: 20px; flex-shrink: 0; accent-color: #2878d0; }
+.editor-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; padding: 6px 0 18px; }
+.location-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+#location-message { margin: 0; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; color: #526174; }
+@media (min-width: 48rem) { .editor-section { padding: 28px; } .editor-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .editor-wide { grid-column: 1 / -1; } #amenity-options { grid-template-columns: repeat(2,minmax(0,1fr)); } }

@@ -9,7 +9,7 @@ function fixture({authorized=true,error=null,property=null}={}) {
  const client={auth:{getUser:async()=>({data:{user:authorized?{id:'admin'}:null}})},from(table){
   if(table==='admin_memberships')return {select:()=>({eq:()=>({maybeSingle:async()=>({data:{role:'admin',enabled:true}})})})};
   calls.push(table);const result={zones,amenities,properties:property,property_amenities:[{amenity_slug:'patio'}]}[table];
-  const query={select:()=>query,order:()=>query,eq:()=>query,maybeSingle:()=>query,then:resolve=>Promise.resolve({data:result}).then(resolve)};return query;
+  const query={select:()=>query,order:()=>query,eq:()=>query,maybeSingle:()=>query,single:()=>({then:resolve=>Promise.resolve({data:Array.isArray(result)?result[0]:result}).then(resolve)}),then:resolve=>Promise.resolve({data:result}).then(resolve)};return query;
  },rpc:(name,args)=>{calls.push({name,args});return {single:async()=>({data:{id:'id',version:2,...args.p_data},error})};}};
  return {client,calls};
 }
