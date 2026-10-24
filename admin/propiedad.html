@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https://*.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>Editar propiedad | NEXO Inmobiliaria</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/admin-panel.css">
+  <script type="module" src="../assets/js/admin/property-editor.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="panel-header"><div class="container panel-header-inner"><a class="brand" href="../index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a><a class="public-site-link" href="../index.html">Ver sitio público</a><div id="admin-session" class="panel-session" hidden><span id="admin-identity"></span><button id="admin-logout" class="secondary-button" type="button">Cerrar sesión</button></div></div></header>
+  <main id="contenido" class="container panel-main" tabindex="-1">
+    <nav class="panel-nav" aria-label="Navegación administrativa"><a id="back-list" href="index.html">← Propiedades</a><span>Gestión de propiedades</span></nav>
+    <h1 id="editor-title">Verificando acceso</h1>
+    <p id="editor-message" role="status" aria-live="polite">Comprobando sesión y permisos…</p>
+    <a id="editor-login" href="login.html" hidden>Iniciar sesión</a>
+    <button id="editor-retry" class="secondary-button" type="button" hidden>Volver a cargar datos</button>
+    <form id="property-form" hidden>
+      <fieldset id="editor-fields" disabled><legend class="sr-only">Información de la propiedad</legend>
+        <div class="editor-grid">
+          <div class="editor-wide"><label for="title">Título</label><input id="title" name="title" required maxlength="200"></div>
+          <div><label for="public_code">Código público (permanente)</label><input id="public_code" name="public_code" readonly required></div>
+          <div><label for="status">Estado</label><select id="status" name="status"><option value="draft">Borrador</option><option value="published">Publicada</option><option value="archived">Archivada</option></select></div>
+          <div><label for="property_type">Tipo</label><select id="property_type" name="property_type"><option value="casa">Casa</option><option value="departamento">Departamento</option><option value="terreno">Terreno</option></select></div>
+          <div><label for="operation">Operación</label><select id="operation" name="operation"><option value="venta">Venta</option><option value="alquiler">Alquiler</option></select></div>
+          <div><label for="price">Precio</label><input id="price" name="price" type="number" inputmode="decimal" min="0.01" max="999999999999.99" step="0.01" required></div>
+          <div><label for="currency">Moneda</label><select id="currency" name="currency"><option value="USD">USD</option><option value="ARS">ARS</option></select></div>
+          <div><label for="zone_slug">Zona</label><select id="zone_slug" name="zone_slug" required></select></div>
+          <div><label for="city">Ciudad</label><input id="city" name="city" required maxlength="100"></div>
+          <div class="editor-wide"><label for="approximate_location">Ubicación aproximada</label><textarea id="approximate_location" name="approximate_location" rows="2" required maxlength="1000" aria-describedby="location-help"></textarea><p id="location-help" class="panel-note">Usá una referencia de zona. No incluyas direcciones privadas de viviendas reales en esta demostración.</p></div>
+          <div><label for="area">Superficie (m²)</label><input id="area" name="area" type="number" inputmode="decimal" min="0.01" max="9999999999.99" step="0.01" required></div>
+          <div><label for="bedrooms">Habitaciones (opcional)</label><input id="bedrooms" name="bedrooms" type="number" inputmode="numeric" min="0" max="32767" step="1"></div>
+          <div><label for="bathrooms">Baños (opcional)</label><input id="bathrooms" name="bathrooms" type="number" inputmode="numeric" min="0" max="32767" step="1"></div>
+          <p id="rooms-help" class="panel-note">Vacío significa sin informar; los terrenos no admiten habitaciones ni baños.</p>
+          <div class="editor-wide"><label for="description">Descripción</label><textarea id="description" name="description" rows="7" required maxlength="20000"></textarea></div>
+        </div>
+        <fieldset class="editor-amenities"><legend>Comodidades</legend><div id="amenity-options"></div></fieldset>
+        <label class="checkbox-label"><input id="featured" name="featured" type="checkbox"> Destacada</label>
+        <label class="checkbox-label"><input id="is_demo" name="is_demo" type="checkbox"> Propiedad ficticia de demostración</label>
+        <p class="panel-note">No se cargan imágenes en esta etapa. Publicar habilita la lectura en la API de Supabase; el catálogo público del sitio mantiene su JSON actual.</p>
+        <div class="editor-actions"><button id="save-property" class="button" type="submit">Guardar borrador</button><a id="cancel-edit" href="index.html">Volver al listado</a></div>
+      </fieldset>
+    </form>
+  </main>
+  <footer class="container panel-footer">NEXO Inmobiliaria · Administración</footer>
+</body>
+</html>
