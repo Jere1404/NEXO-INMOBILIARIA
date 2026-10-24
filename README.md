@@ -82,4 +82,4 @@ Soporte responsive preparado sin fotografías nuevas. Ver [contrato de imágenes
 
 ## V3B — recursos incorporados, pendientes de revisión
 
-Las doce imágenes de propiedades aportadas por el usuario están asociadas a sus identificadores; las seis destacadas utilizan las mismas referencias. Se sirven versiones WebP/JPEG optimizadas, sin cargar los PNG originales. Son ilustraciones generadas con IA de inmuebles ficticios. Persisten carteles en nexo-007, nexo-008, nexo-011 y nexo-012; los recortes y metadatos se detallan en `docs/RECURSOS.md`.
+Las doce imágenes de propiedades aportadas por el usuario están asociadas a sus identificadores; las seis destacadas utilizan las mismas referencias. Se sirven versiones WebP/JPEG optimizadas, sin cargar los PNG originales. Son ilustraciones generadas con IA de inmuebles ficticios. Las versiones corregidas de nexo-007, nexo-008, nexo-011 y nexo-012 ya se incorporaron y sus derivados se regeneraron sin carteles; los recortes y metadatos se detallan en `docs/RECURSOS.md`.

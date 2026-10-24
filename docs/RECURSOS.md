@@ -83,3 +83,9 @@ Recortes aplicados únicamente a derivados: `nexo-005`, 150 px superiores de cie
 Los carteles de `nexo-007`, `nexo-008`, `nexo-011` y `nexo-012` permanecen: retirarlos por recorte comprometería el encuadre de vegetación/arquitectura. Requieren una versión limpia o edición externa antes de considerar cerrada la revisión visual. No se hizo reconstrucción de contenido ni retoque generativo.
 
 Las tarjetas conservan el espacio uniforme 4:3 pero usan `object-fit: contain`: muestran el encuadre completo, con bandas discretas cuando el recurso tiene otra proporción. Esto preserva el original 3:2 de nexo-005 antes del recorte y las proporciones reales de los derivados. Inicio y catálogo muestran avisos de propiedad ficticia e imagen ilustrativa generada con IA.
+
+### Cierre de corrección de carteles V3B
+
+Se recibieron los cuatro originales corregidos mediante `72fb7c0`. Se verificó visualmente que nexo-007, nexo-008, nexo-011 y nexo-012 ya no contienen carteles. Los archivos 011 y 012 llegaron como `NEXO-011.png` y `NEXO-012.png`: sustituyen las copias antiguas con nombres uniformes en minúsculas.
+
+Se regeneraron únicamente sus 16 derivados, WebP y JPEG en 480 × 360 y 960 × 720 px. Se mantuvieron las calidades anteriores (82 WebP y 84 JPEG), sin nuevos retoques ni recortes de contenido significativo; solo se ajusta la diferencia mínima de proporción de los nuevos originales al 4:3. Las otras ocho propiedades, sus imágenes, el JSON y la lógica de búsqueda permanecen intactos. La observación histórica sobre los cuatro carteles pendientes queda resuelta.
