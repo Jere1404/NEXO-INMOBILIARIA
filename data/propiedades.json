@@ -15,7 +15,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "comodidades": [
       "patio",
       "cochera",
@@ -41,7 +48,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "comodidades": [
       "balcon",
       "ascensor"
@@ -66,7 +80,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "comodidades": [
       "balcon",
       "ascensor"
@@ -91,7 +112,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "comodidades": [
       "patio",
       "cochera"
@@ -116,7 +144,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "comodidades": [
       "acceso-vehicular"
     ],
@@ -140,7 +175,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "comodidades": [
       "balcon",
       "ascensor",
@@ -171,7 +213,14 @@
     "unidadSuperficie": "m²",
     "destacada": false,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "fotografias": [],
     "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
@@ -197,7 +246,14 @@
     "unidadSuperficie": "m²",
     "destacada": false,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "fotografias": [],
     "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
@@ -221,7 +277,14 @@
     "unidadSuperficie": "m²",
     "destacada": false,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "fotografias": [],
     "ubicacionAproximada": "Zona Centro, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
@@ -246,7 +309,14 @@
     "unidadSuperficie": "m²",
     "destacada": false,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "fotografias": [],
     "ubicacionAproximada": "Zona Cambá Cuá, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
@@ -270,7 +340,14 @@
     "unidadSuperficie": "m²",
     "destacada": false,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "fotografias": [],
     "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
@@ -294,7 +371,14 @@
     "unidadSuperficie": "m²",
     "destacada": false,
     "ficticia": true,
-    "imagen": null,
+    "imagen": {
+      "src": null,
+      "width": null,
+      "height": null,
+      "alt": "",
+      "webp": [],
+      "jpeg": []
+    },
     "fotografias": [],
     "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   }

@@ -47,7 +47,7 @@ function fillForm(filters) {
 }
 function showResults(filters) {
   const results = sortProperties(filterProperties(properties, filters), filters.orden);
-  renderPropertyCards(list, results, { showPlaceholder: true });
+  renderPropertyCards(list, results, { showPlaceholder: true, priorityImages: 1 });
   count.textContent = `${results.length} ${results.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'} de ${properties.length}`;
   empty.hidden = results.length !== 0;
   error.hidden = true; error.textContent = '';

@@ -67,3 +67,7 @@ Variantes generadas en la misma carpeta:
 | `nexo-edificio-mobile.jpg` | 960 × 1200 | 147 KiB |
 
 Se usa `<picture>` para elegir el recorte vertical en móvil y horizontal en tablet/escritorio, WebP con respaldo JPEG, carga `eager` y prioridad alta. El texto y el formulario permanecen independientes de la fotografía. Una superposición azul marino semitransparente conserva el contraste y el degradado previo sigue como respaldo si la imagen no carga. La imagen decorativa usa `alt=""` para evitar redundancia con el contenido del hero.
+
+## Sistema de imágenes de propiedades — V3A
+
+Se prepara el soporte de fotografías sin incorporar recursos nuevos. Las doce propiedades muestran un respaldo CSS 4:3. No hay nuevas licencias ni atribuciones que registrar todavía. La selección y verificación de fotografías se realizará en una etapa posterior autorizada; ver `docs/IMAGENES-PROPIEDADES.md`. La fotografía del hero se conserva intacta.

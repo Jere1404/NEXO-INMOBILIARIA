@@ -39,17 +39,68 @@ function element(tag, className, text) {
   return node;
 }
 
+// Legacy null, incomplete metadata or unsafe paths use the visual fallback.
+export function getPropertyImage(image) {
+  const localPath = (path, extension) => typeof path === 'string'
+    && new RegExp(`^assets/images/propiedades/[a-zA-Z0-9/_-]+\\.${extension}$`).test(path);
+  const positive = value => Number.isInteger(value) && value > 0;
+  if (!image || !localPath(image.src, 'jpe?g') || !positive(image.width) || !positive(image.height)
+    || typeof image.alt !== 'string' || !image.alt.trim()) return null;
+  const variants = (items, extension) => (Array.isArray(items) ? items : [])
+    .filter(item => item && localPath(item.src, extension) && positive(item.width))
+    .sort((a, b) => a.width - b.width)
+    .filter((item, index, items) => index === 0 || item.width !== items[index - 1].width);
+  return { ...image, webp: variants(image.webp, 'webp'), jpeg: variants(image.jpeg, 'jpe?g') };
+}
+
+function createPropertyMedia(image, { priority, sizes }) {
+  const media = element('div', 'property-media');
+  const fallback = element('div', 'property-image-placeholder', 'Fotografía no disponible');
+  media.append(fallback);
+  const photo = getPropertyImage(image);
+  if (!photo) return media;
+
+  const picture = element('picture');
+  if (photo.webp.length) {
+    const source = element('source');
+    source.type = 'image/webp';
+    source.srcset = photo.webp.map(item => `${item.src} ${item.width}w`).join(', ');
+    source.sizes = sizes;
+    picture.append(source);
+  }
+  const img = element('img');
+  img.alt = photo.alt;
+  img.width = photo.width;
+  img.height = photo.height;
+  img.loading = priority ? 'eager' : 'lazy';
+  img.decoding = 'async';
+  img.sizes = sizes;
+  if (photo.jpeg.length) img.srcset = photo.jpeg.map(item => `${item.src} ${item.width}w`).join(', ');
+  img.addEventListener('error', () => {
+    picture.remove();
+    fallback.hidden = false;
+  }, { once: true });
+  img.addEventListener('load', () => { fallback.hidden = true; }, { once: true });
+  img.src = photo.src;
+  picture.append(img);
+  media.append(picture);
+  return media;
+}
+
 // Shared rendering keeps prices, labels and applicable features consistent.
 // Cards are informational: no fake detail links or keyboard stops are added.
-export function renderPropertyCards(list, properties, { showPlaceholder = false } = {}) {
+export function renderPropertyCards(list, properties, { showPlaceholder = true, priorityImages = 0 } = {}) {
   const number = new Intl.NumberFormat('es-AR');
   const fragment = document.createDocumentFragment();
+  const sizes = list.id === 'catalog-properties'
+    ? '(min-width: 1280px) 432px, (min-width: 1024px) calc((100vw - 416px) / 2), (min-width: 768px) calc((100vw - 100px) / 2), (min-width: 640px) calc((100vw - 60px) / 2), calc(100vw - 40px)'
+    : '(min-width: 1280px) 384px, (min-width: 1024px) calc((100vw - 128px) / 3), (min-width: 768px) calc((100vw - 100px) / 2), (min-width: 640px) calc((100vw - 60px) / 2), calc(100vw - 40px)';
+  let index = 0;
   for (const property of properties) {
     const item = element('li');
     const card = element('article', 'property-card');
-    if (showPlaceholder) {
-      card.append(element('div', 'property-image-placeholder', 'Fotografía pendiente'));
-    }
+    if (showPlaceholder || getPropertyImage(property.imagen)) card.append(createPropertyMedia(property.imagen, { priority: index < priorityImages, sizes }));
+    index += 1;
     const meta = element('div', 'property-meta');
     meta.append(element('span', 'property-type', propertyTypes[property.tipo]), element('span', 'operation-badge', operations[property.operacion]));
     card.append(meta,
