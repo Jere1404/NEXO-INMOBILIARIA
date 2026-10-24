@@ -16,12 +16,30 @@
     "destacada": true,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-001/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Patio con césped y parrilla de una casa moderna.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-001/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-001/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-001/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-001/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "comodidades": [
       "patio",
@@ -49,12 +67,30 @@
     "destacada": true,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-002/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Living con balcón y cocina integrada.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-002/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-002/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-002/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-002/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "comodidades": [
       "balcon",
@@ -81,12 +117,30 @@
     "destacada": true,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-003/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Departamento compacto con balcón y dormitorio.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-003/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-003/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-003/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-003/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "comodidades": [
       "balcon",
@@ -113,12 +167,30 @@
     "destacada": true,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-004/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Fachada de una casa con cochera y jardín.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-004/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-004/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-004/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-004/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "comodidades": [
       "patio",
@@ -145,12 +217,30 @@
     "destacada": true,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-005/principal-960.jpg",
+      "width": 960,
+      "height": 546,
+      "alt": "Imagen ilustrativa generada con IA: Terreno despejado en un entorno residencial.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-005/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-005/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-005/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-005/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "comodidades": [
       "acceso-vehicular"
@@ -176,12 +266,30 @@
     "destacada": true,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-006/principal-960.jpg",
+      "width": 960,
+      "height": 617,
+      "alt": "Imagen ilustrativa generada con IA: Living luminoso conectado con un balcón.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-006/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-006/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-006/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-006/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "comodidades": [
       "balcon",
@@ -214,12 +322,30 @@
     "destacada": false,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-007/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Casa con jardín y cochera.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-007/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-007/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-007/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-007/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "fotografias": [],
     "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
@@ -247,12 +373,30 @@
     "destacada": false,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-008/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Patio y galería de una casa familiar.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-008/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-008/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-008/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-008/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "fotografias": [],
     "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
@@ -278,12 +422,30 @@
     "destacada": false,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-009/principal-960.jpg",
+      "width": 960,
+      "height": 617,
+      "alt": "Imagen ilustrativa generada con IA: Living comedor de un departamento compacto.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-009/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-009/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-009/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-009/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "fotografias": [],
     "ubicacionAproximada": "Zona Centro, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
@@ -310,12 +472,30 @@
     "destacada": false,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-010/principal-960.jpg",
+      "width": 960,
+      "height": 617,
+      "alt": "Imagen ilustrativa generada con IA: Departamento con balcón al atardecer.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-010/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-010/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-010/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-010/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "fotografias": [],
     "ubicacionAproximada": "Zona Cambá Cuá, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
@@ -341,12 +521,30 @@
     "destacada": false,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-011/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Terreno con vegetación y viviendas vecinas.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-011/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-011/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-011/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-011/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "fotografias": [],
     "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
@@ -372,12 +570,30 @@
     "destacada": false,
     "ficticia": true,
     "imagen": {
-      "src": null,
-      "width": null,
-      "height": null,
-      "alt": "",
-      "webp": [],
-      "jpeg": []
+      "src": "assets/images/propiedades/nexo-012/principal-960.jpg",
+      "width": 960,
+      "height": 720,
+      "alt": "Imagen ilustrativa generada con IA: Lote amplio en un entorno residencial.",
+      "webp": [
+        {
+          "src": "assets/images/propiedades/nexo-012/principal-480.webp",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-012/principal-960.webp",
+          "width": 960
+        }
+      ],
+      "jpeg": [
+        {
+          "src": "assets/images/propiedades/nexo-012/principal-480.jpg",
+          "width": 480
+        },
+        {
+          "src": "assets/images/propiedades/nexo-012/principal-960.jpg",
+          "width": 960
+        }
+      ]
     },
     "fotografias": [],
     "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."

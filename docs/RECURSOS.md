@@ -71,3 +71,15 @@ Se usa `<picture>` para elegir el recorte vertical en móvil y horizontal en tab
 ## Sistema de imágenes de propiedades — V3A
 
 Se prepara el soporte de fotografías sin incorporar recursos nuevos. Las doce propiedades muestran un respaldo CSS 4:3. No hay nuevas licencias ni atribuciones que registrar todavía. La selección y verificación de fotografías se realizará en una etapa posterior autorizada; ver `docs/IMAGENES-PROPIEDADES.md`. La fotografía del hero se conserva intacta.
+
+## V3B — imágenes ilustrativas generadas con IA
+
+El usuario aportó doce PNG mediante el commit `4186c60` y autorizó su uso ilustrativo. Se normalizaron sus nombres a `nexo-001.png`…`nexo-012.png`, conservando los originales sin alteraciones. No son fotografías de viviendas reales ni acreditan ubicaciones, superficies o disponibilidad. El generador y sus condiciones de uso no fueron proporcionados; no se atribuye una licencia de banco de imágenes.
+
+Se generaron derivados locales por identificador, con anchos 480 y 960 px en WebP (calidad 82) y JPEG progresivo (calidad 84). Solo estos derivados se referencian en JSON: los PNG originales no se cargan en las tarjetas.
+
+Recortes aplicados únicamente a derivados: `nexo-005`, 150 px superiores de cielo; `nexo-006`, `nexo-009` y `nexo-010`, 155 px superiores de techo. Se conserva el ancho completo y no se estiran las imágenes. Los originales se mantienen intactos para revisión.
+
+Los carteles de `nexo-007`, `nexo-008`, `nexo-011` y `nexo-012` permanecen: retirarlos por recorte comprometería el encuadre de vegetación/arquitectura. Requieren una versión limpia o edición externa antes de considerar cerrada la revisión visual. No se hizo reconstrucción de contenido ni retoque generativo.
+
+Las tarjetas conservan el espacio uniforme 4:3 pero usan `object-fit: contain`: muestran el encuadre completo, con bandas discretas cuando el recurso tiene otra proporción. Esto preserva el original 3:2 de nexo-005 antes del recorte y las proporciones reales de los derivados. Inicio y catálogo muestran avisos de propiedad ficticia e imagen ilustrativa generada con IA.

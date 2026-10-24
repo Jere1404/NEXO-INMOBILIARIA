@@ -41,3 +41,9 @@ node --test tests/*.test.mjs
 ```
 
 Para revisar el sitio, servirlo por HTTP. Además de los tests de datos y filtros, verificar seis destacadas y doce tarjetas de catálogo, bloque 4:3, ausencia de desbordamientos, casos de foto ausente/error y selección WebP/JPEG con metadatos de prueba interceptados en el navegador. Esos casos no agregan fotografías ni rutas ficticias al JSON del proyecto.
+
+## Actualización V3B
+
+Las doce propiedades ya tienen referencias principales locales, dimensiones reales y textos alternativos que identifican su origen ilustrativo con IA. Se sirven WebP y JPEG en 480/960 px desde cada subcarpeta. Los PNG normalizados se conservan como originales y no forman parte de la carga del sitio.
+
+El encuadre ahora usa `object-fit: contain` dentro del bloque 4:3 para no ocultar partes importantes ni deformar imágenes de otras proporciones. Véase el registro de recortes y carteles pendientes en `RECURSOS.md`. Las fotos del hero, los precios y la lógica de filtros no se modificaron.

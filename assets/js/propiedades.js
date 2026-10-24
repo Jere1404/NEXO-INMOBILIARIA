@@ -53,7 +53,7 @@ function showResults(filters) {
   error.hidden = true; error.textContent = '';
   document.querySelector('#sort-help').textContent = filters.orden.startsWith('precio')
     ? 'Precios agrupados por moneda: primero ARS y luego USD, ordenados dentro de cada grupo. No hay conversión ni comparación entre monedas. Alquileres por mes.'
-    : 'Las fotografías están pendientes de selección y autorización. Los cambios del formulario se aplican al buscar u ordenar.';
+    : 'Imágenes ilustrativas generadas con IA. Los cambios del formulario se aplican al buscar u ordenar.';
 }
 function updateUrl(filters) {
   const query = serializeFilters(filters);

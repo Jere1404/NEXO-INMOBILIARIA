@@ -114,7 +114,7 @@ export function renderPropertyCards(list, properties, { showPlaceholder = true, 
     if (property.habitaciones !== null) values.push(`${property.habitaciones} ${property.habitaciones === 1 ? 'habitación' : 'habitaciones'}`);
     if (property.banos !== null) values.push(`${property.banos} ${property.banos === 1 ? 'baño' : 'baños'}`);
     for (const value of values) features.append(element('li', '', value));
-    card.append(features, element('p', 'property-disclaimer', 'Propiedad ficticia · Demostración'));
+    card.append(features, element('p', 'property-disclaimer', 'Propiedad ficticia · Imagen ilustrativa generada con IA'));
     item.append(card);
     fragment.append(item);
   }

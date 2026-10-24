@@ -79,3 +79,7 @@ La carga necesita HTTP: abrir el HTML mediante `file://` puede impedir módulos 
 ## Imágenes de propiedades — V3A
 
 Soporte responsive preparado sin fotografías nuevas. Ver [contrato de imágenes](docs/IMAGENES-PROPIEDADES.md) y [estructura de recursos](assets/images/propiedades/README.md). Las doce tarjetas usan respaldos 4:3 hasta incorporar fotos autorizadas; las seis destacadas comparten ese soporte. `imagen: null` sigue siendo compatible. Pruebas: `node --test tests/*.test.mjs`.
+
+## V3B — recursos incorporados, pendientes de revisión
+
+Las doce imágenes de propiedades aportadas por el usuario están asociadas a sus identificadores; las seis destacadas utilizan las mismas referencias. Se sirven versiones WebP/JPEG optimizadas, sin cargar los PNG originales. Son ilustraciones generadas con IA de inmuebles ficticios. Persisten carteles en nexo-007, nexo-008, nexo-011 y nexo-012; los recortes y metadatos se detallan en `docs/RECURSOS.md`.
