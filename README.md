@@ -99,3 +99,7 @@ Build local: `npm ci --ignore-scripts` y `npm run build:auth`. Pruebas: `npm tes
 ## Compatibilidad con correos predeterminados de Supabase
 
 Auth admite sesiones en el fragmento de los enlaces predeterminados de invitación y recuperación, además de `token_hash`. Las páginas de Auth usan implicit con consumo manual de URL y verificación del usuario en servidor; los otros clientes mantienen PKCE. La configuración pública proporcionada se conserva. Ver `docs/SUPABASE-AUTH-V5A1.md` para distinguir la Site URL de Supabase del `siteUrl` del frontend. No se modificaron el proyecto Supabase ni sus plantillas; las pruebas reales tras publicar siguen pendientes.
+
+## V5B.1 — listado administrativo, pendiente de revisión
+
+`admin/index.html` incorpora un panel de solo lectura: requiere sesión y membresía habilitada, consulta Supabase, muestra indicadores y listado con búsqueda, filtros y paginación. El login ofrece acceso al panel para cuentas autorizadas. No hay escrituras de propiedades ni cambios en el catálogo público. Ver [implementación y validación pendiente del proyecto real](docs/ADMIN-PROPIEDADES-V5B1.md).
