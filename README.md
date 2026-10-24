@@ -103,3 +103,7 @@ Auth admite sesiones en el fragmento de los enlaces predeterminados de invitaci�
 ## V5B.1 — listado administrativo, pendiente de revisión
 
 `admin/index.html` incorpora un panel de solo lectura: requiere sesión y membresía habilitada, consulta Supabase, muestra indicadores y listado con búsqueda, filtros y paginación. El login ofrece acceso al panel para cuentas autorizadas. No hay escrituras de propiedades ni cambios en el catálogo público. Ver [implementación y validación pendiente del proyecto real](docs/ADMIN-PROPIEDADES-V5B1.md).
+
+## V5B.2 — gestión de propiedades, pendiente de revisión
+
+El panel permite crear borradores, editar datos y comodidades, publicar, despublicar y archivar sin eliminar registros. El guardado transaccional utiliza la migración adicional de V5B.2, ya aplicada y verificada manualmente en Supabase por el responsable; no se ejecuta automáticamente ni debe repetirse en ese proyecto. Conserva RLS y detecta conflictos de versión. El catálogo público sigue usando su JSON y no se implementa carga de imágenes. Ver [implementación, instalación y pruebas de V5B.2](docs/ADMIN-PROPIEDADES-V5B2.md).

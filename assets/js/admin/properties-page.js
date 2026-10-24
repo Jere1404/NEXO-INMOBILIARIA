@@ -45,6 +45,9 @@ function renderRows(rows) {
       if (label === 'Estado') content.className = `status-badge ${Object.hasOwn(propertyStatuses,row.status) ? row.status : ''}`;
       td.append(content);tr.append(td);
     });
+    const action = document.createElement('td'); action.dataset.label = 'Gestión'; action.setAttribute('role','cell');
+    const link = document.createElement('a'); link.href = `propiedad.html?id=${encodeURIComponent(row.id)}`;
+    link.textContent = 'Editar'; link.setAttribute('aria-label',`Editar ${row.title}`); action.append(link); tr.append(action);
     fragment.append(tr);
   }
   $('admin-properties').replaceChildren(fragment);

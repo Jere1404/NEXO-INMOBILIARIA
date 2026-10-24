@@ -19,6 +19,7 @@ test('PostgreSQL migrations, constraints, idempotent import and RLS', async t =>
     grant usage on schema auth to anon, authenticated;
     insert into auth.users values ('${admin}'),('${other}');`);
   await db.exec(migration);
+  await db.exec(await readFile(new URL('../migrations/202610240002_v5b2_property_management.sql', import.meta.url), 'utf8'));
   await db.exec(seed);
   const snapshot = await db.query('select id,public_code,version from properties order by public_code');
   await db.exec(seed);
@@ -75,6 +76,44 @@ test('PostgreSQL migrations, constraints, idempotent import and RLS', async t =>
     assert.equal(changed.rows[0].public_code,'test-property');assert.equal(Number(changed.rows[0].version),2);
     await db.exec("delete from properties where public_code='test-property'");
   });
+  const payload = { public_code:'rpc-property',title:'Created property',description:'Description',property_type:'casa',operation:'venta',status:'draft',price:100,currency:'USD',zone_slug:'centro',city:'Corrientes Capital',area:100,bedrooms:2,bathrooms:1,approximate_location:'Centro',featured:false,is_demo:true };
+  const save = async (id,version,data,amenities=[]) => (await db.query('select * from public.admin_save_property($1::uuid,$2::bigint,$3::jsonb,$4::text[])',[id,version,JSON.stringify(data),amenities])).rows[0];
+  await t.test('transactional management creates, edits, changes status, and detects stale versions', async () => {
+    await asRole('authenticated',admin);
+    let row = await save(null,null,payload,['cochera']);
+    assert.equal(row.status,'draft');assert.equal(Number(row.version),1);
+    await assert.rejects(()=>save(null,null,payload),e=>e.code==='23505');
+    await assert.rejects(()=>save(null,null,{...payload,public_code:'invalid-new',status:'published'}),e=>e.code==='22023');
+    const id = row.id;
+    row = await save(id,row.version,{...payload,title:'Edited property'},['patio']);
+    assert.equal(row.title,'Edited property');assert.equal(Number(row.version),2);
+    await assert.rejects(()=>save(id,1,payload),e=>e.code==='40001');
+    for (const status of ['published','draft','archived','draft']) {
+      row = await save(id,row.version,{...payload,status},['patio']);
+      assert.equal(row.status,status);
+    }
+    await asRole('anon');assert.equal((await db.query('select id from properties where id=$1',[id])).rows.length,0);
+    await asRole('authenticated',admin);assert.equal((await db.query('select id from properties where id=$1',[id])).rows.length,1);
+  });
+  await t.test('invalid amenities and constraints roll back all property changes', async () => {
+    await asRole('authenticated',admin);
+    const before = (await db.query("select * from properties where public_code='rpc-property'")).rows[0];
+    const links = (await db.query('select * from property_amenities where property_id=$1',[before.id])).rows;
+    await assert.rejects(()=>save(before.id,before.version,{...payload,title:'Must not persist'},['missing-amenity']),e=>e.code==='23503');
+    await assert.rejects(()=>save(before.id,before.version,{...payload,price:-1},['cochera']),e=>e.code==='23514');
+    await assert.rejects(()=>save(before.id,before.version,{...payload,property_type:'terreno'},[]),e=>e.code==='23514');
+    await assert.rejects(()=>save(before.id,before.version,{...payload,id:before.id}),e=>e.code==='22023');
+    assert.deepEqual((await db.query('select * from properties where id=$1',[before.id])).rows[0],before);
+    assert.deepEqual((await db.query('select * from property_amenities where property_id=$1',[before.id])).rows,links);
+  });
+  await t.test('RPC rejects anonymous and authenticated non-admin writers without side effects', async () => {
+    await asRole('anon');await denied(()=>save(null,null,{...payload,public_code:'rpc-denied'}));
+    await asRole('authenticated',other);await denied(()=>save(null,null,{...payload,public_code:'rpc-denied'}));
+    await asRole('authenticated',admin);
+    assert.equal((await db.query("select id from properties where public_code='rpc-denied'")).rows.length,0);
+    assert.equal(await count('property_images'),12);
+    await db.query("delete from properties where public_code='rpc-property'");
+  });
   await t.test('pending images and revoked administrator remain protected', async () => {
     await asRole('authenticated',admin);
     await db.exec("update properties set status='published' where public_code='nexo-001'; update property_images set processing_status='pending' where property_id=(select id from properties where public_code='nexo-001')");
@@ -82,5 +121,6 @@ test('PostgreSQL migrations, constraints, idempotent import and RLS', async t =>
     await asRole('postgres');await db.query('update admin_memberships set enabled=false where user_id=$1',[admin]);
     await asRole('authenticated',admin);assert.equal(await count('properties'),1);assert.equal((await db.query("update properties set status='archived' returning id")).rows.length,0);
     await denied(()=>db.exec('update admin_memberships set enabled=true'));
+    await denied(()=>save(null,null,{...payload,public_code:'rpc-revoked'}));
   });
 });
