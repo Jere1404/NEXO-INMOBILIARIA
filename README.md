@@ -92,6 +92,10 @@ Ver [configuración y pruebas de Supabase V5A](docs/SUPABASE-V5A.md). Tests de a
 
 ## V5A.1 — páginas de acceso preparadas
 
-Páginas `admin/activar.html`, `admin/login.html` y `admin/recuperar.html`, con SDK oficial fijado y servido localmente. La configuración de `admin/config.js` está vacía: no hay conexión real ni registro público o alta automática de administradores. Ver [configuración y flujos de Auth](docs/SUPABASE-AUTH-V5A1.md).
+Páginas `admin/activar.html`, `admin/login.html` y `admin/recuperar.html`, con SDK oficial fijado y servido localmente. La configuración pública de `admin/config.js` fue proporcionada por el responsable. No hay registro público ni alta automática de administradores; la verificación del correo y la sesión reales sigue pendiente. Ver [configuración y flujos de Auth](docs/SUPABASE-AUTH-V5A1.md).
 
 Build local: `npm ci --ignore-scripts` y `npm run build:auth`. Pruebas: `npm test`. La publicación y los cambios de configuración de Supabase requieren autorización separada. Los cambios pendientes de V5A se conservaron, sin commits ni operaciones remotas de base de datos.
+
+## Compatibilidad con correos predeterminados de Supabase
+
+Auth admite sesiones en el fragmento de los enlaces predeterminados de invitación y recuperación, además de `token_hash`. Las páginas de Auth usan implicit con consumo manual de URL y verificación del usuario en servidor; los otros clientes mantienen PKCE. La configuración pública proporcionada se conserva. Ver `docs/SUPABASE-AUTH-V5A1.md` para distinguir la Site URL de Supabase del `siteUrl` del frontend. No se modificaron el proyecto Supabase ni sus plantillas; las pruebas reales tras publicar siguen pendientes.

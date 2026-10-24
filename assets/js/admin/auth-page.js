@@ -52,7 +52,11 @@ async function init() {
   }
   if (passwordMode) {
     try {
-      await verifyEmailLink(client,link,mode === 'activate' ? 'invite' : 'recovery');
+      const user = await verifyEmailLink(client,link,mode === 'activate' ? 'invite' : 'recovery');
+      if (user.email) {
+        $('verified-account').textContent = `Cuenta verificada: ${user.email}. Comprobá que sea tu correo antes de continuar.`;
+        $('verified-account').hidden = false;
+      }
       $('password-fields').hidden = false; $('password-fields').disabled = false; controls.disabled = false;
       $('auth-form').addEventListener('submit',finishPassword);
       message('Cuenta verificada. Elegí tu contraseña.');

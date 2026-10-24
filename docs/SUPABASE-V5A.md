@@ -67,7 +67,7 @@ No publicar propiedades reales ni conectar la web pública hasta aprobar estas p
 
 `createBackendClient(createClient, {url, publishableKey}, storage)` recibe la fábrica del SDK oficial `@supabase/supabase-js` y configuración pública explícita. No importa SDK desde CDN ni instancia un cliente por sí sola; no es dependencia de la web actual. Al conectarlo en V5B se fijará una versión del SDK. La URL del proyecto y clave **publishable** son públicas; nunca pasar `sb_secret_*`, `service_role` o claves de base de datos. La fábrica rechaza claves sin el prefijo publishable y conexiones HTTP.
 
-Para el futuro panel, pasar `window.sessionStorage` y habilitar una política CSP adecuada. Sin almacenamiento explícito la sesión no persiste. Se prepara PKCE y `detectSessionInUrl=false`; los callbacks de invitación/recuperación y el intercambio de código requieren implementación explícita en V5B. No hay método `signUp`.
+Para el futuro panel, pasar `window.sessionStorage` y habilitar una política CSP adecuada. Sin almacenamiento explícito la sesión no persiste. Se conserva PKCE por defecto y `detectSessionInUrl=false`. Las páginas de V5A.1 optan explícitamente por implicit para correos predeterminados; los enlaces con token_hash siguen admitidos. Ver `SUPABASE-AUTH-V5A1.md`. No hay método `signUp`.
 
 `createAdminAuth` permite login/logout y verifica la identidad con `auth.getUser()` y la membresía habilitada en servidor. Si la cuenta no está autorizada, cierra la sesión. Una validación de UI ayuda a la experiencia, pero RLS seguirá siendo la autoridad. No se promete login real operativo hasta configurar y probar Auth.
 
