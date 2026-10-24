@@ -7,6 +7,7 @@
   <title>Inicio | NEXO Inmobiliaria</title>
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/home.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -39,9 +40,81 @@
         <div class="hero-bottom"><p>Tu próximo hogar comienza acá.</p><p class="hero-location">27°28′ S &nbsp; 58°50′ O <span aria-hidden="true">—</span> Corrientes</p></div>
       </div>
     </section>
+
+    <section class="home-section featured-section" aria-labelledby="featured-title">
+      <div class="container">
+        <div class="section-heading">
+          <p class="eyebrow">ESPACIOS PARA IMAGINAR TU VIDA</p>
+          <h2 id="featured-title">Propiedades que pueden interesarte</h2>
+          <p>Distintas formas de encontrar tu lugar en Corrientes.</p>
+        </div>
+        <p class="demo-note">Selección de demostración: todas las propiedades, precios y características son ficticios. No representan ofertas reales.</p>
+        <p id="featured-status" class="load-status" role="status" hidden></p>
+        <noscript><p class="demo-note">Activá JavaScript para ver las seis propiedades de demostración. Podés seguir usando el buscador y los enlaces por categoría sin JavaScript.</p></noscript>
+        <ul id="featured-properties" class="property-grid" aria-label="Propiedades destacadas de demostración"></ul>
+        <template id="property-card-template">
+          <li>
+            <article class="property-card">
+              <div class="property-meta"><span class="property-type"></span><span class="operation-badge"></span></div>
+              <p class="property-location"></p>
+              <h3 class="property-title"></h3>
+              <p class="property-price"></p>
+              <ul class="property-features" aria-label="Características"></ul>
+              <p class="property-disclaimer">Propiedad ficticia · Demostración</p>
+            </article>
+          </li>
+        </template>
+      </div>
+    </section>
+
+    <section class="home-section categories-section" aria-labelledby="categories-title">
+      <div class="container">
+        <div class="section-heading"><p class="eyebrow">CADA BÚSQUEDA ES DIFERENTE</p><h2 id="categories-title">Explorá por tipo de propiedad</h2><p>Elegí el espacio que se adapta a lo que tenés en mente.</p></div>
+        <div class="category-grid">
+          <a class="category-card" href="propiedades.html?tipo=casa"><h3>Casas</h3><p>Espacio para una nueva etapa.</p><span>Explorar casas <span aria-hidden="true">→</span></span></a>
+          <a class="category-card" href="propiedades.html?tipo=departamento"><h3>Departamentos</h3><p>Tu lugar, al ritmo de la ciudad.</p><span>Explorar departamentos <span aria-hidden="true">→</span></span></a>
+          <a class="category-card" href="propiedades.html?tipo=terreno"><h3>Terrenos</h3><p>El comienzo de tu próximo proyecto.</p><span>Explorar terrenos <span aria-hidden="true">→</span></span></a>
+        </div>
+        <p class="section-note">El catálogo está en desarrollo. Estos enlaces conservan el tipo elegido en la URL.</p>
+      </div>
+    </section>
+
+    <section class="home-section values-section" aria-labelledby="values-title">
+      <div class="container">
+        <div class="section-heading"><p class="eyebrow">UNA FORMA SIMPLE DE ACERCARTE</p><h2 id="values-title">¿Por qué elegir NEXO?</h2><p>Encontrar un lugar empieza por sentirte bien acompañado.</p></div>
+        <div class="values-grid">
+          <article class="value-card"><h3>Confianza</h3><p>Información clara para tomar decisiones.</p></article>
+          <article class="value-card"><h3>Simplicidad</h3><p>Herramientas intuitivas para encontrar propiedades.</p></article>
+          <article class="value-card"><h3>Acompañamiento</h3><p>Comunicación sencilla durante la búsqueda.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-section services-section" aria-labelledby="services-title">
+      <div class="container services-layout">
+        <div class="section-heading"><p class="eyebrow">CERCA DE CADA DECISIÓN</p><h2 id="services-title">Nuestros servicios</h2><p>Una propuesta para cada momento de tu camino inmobiliario.</p><a class="text-link" href="servicios.html">Conocer nuestros servicios</a><p class="section-note">Página de servicios en desarrollo.</p></div>
+        <ul class="service-list">
+          <li><h3>Compra de propiedades</h3><p>Encontrá un espacio que se adapte a tus necesidades.</p></li>
+          <li><h3>Venta de propiedades</h3><p>Presentá tu propiedad con información clara.</p></li>
+          <li><h3>Alquileres</h3><p>Explorá opciones para tu próximo hogar.</p></li>
+          <li><h3>Asesoramiento inmobiliario</h3><p>Orientación para pensar tu siguiente paso.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="contact-section" aria-labelledby="contact-title">
+      <div class="container contact-inner"><div><p class="eyebrow">TU PRÓXIMO PASO</p><h2 id="contact-title">¿Necesitás ayuda para encontrar tu próxima propiedad?</h2><p>Estamos preparando un espacio para acercarnos a tu búsqueda.</p></div><div class="contact-action"><a class="button" href="contacto.html">Contactanos</a><p>Página de contacto en desarrollo.</p></div></div>
+    </section>
   </main>
-  <footer class="site-footer">
-    <div class="container footer-inner"><p class="footer-signature">NEXO <span>Tu próximo hogar comienza acá.</span></p><p>Proyecto de demostración · Inmobiliaria e inmuebles ficticios.</p></div>
+  <footer class="site-footer home-footer">
+    <div class="container">
+      <div class="home-footer-top">
+        <div><a class="brand" href="index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a><p>Tu próximo hogar comienza acá.</p></div>
+        <nav class="footer-nav" aria-label="Navegación secundaria"><a href="index.html">Inicio</a><a href="propiedades.html">Propiedades</a><a href="nosotros.html">Nosotros</a><a href="servicios.html">Servicios</a><a href="contacto.html">Contacto</a></nav>
+        <p class="footer-location">Corrientes Capital,<br>Argentina.</p>
+      </div>
+      <p class="footer-disclaimer">Proyecto ficticio de demostración. Las propiedades y los datos comerciales no representan ofertas reales.</p>
+    </div>
   </footer>
 </body>
 </html>

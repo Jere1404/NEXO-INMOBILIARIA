@@ -1,4 +1,4 @@
-# Recursos visuales — Etapa 2
+# Recursos visuales — Etapas 2 y 2B
 
 ## Tipografía
 
@@ -18,8 +18,14 @@ No se incorporaron fotografías porque todavía no se seleccionó una con autori
 
 ## Alcance provisional
 
-Propiedades, Nosotros, Servicios y Contacto son páginas mínimas con avisos de desarrollo y enlaces para volver. No hay resultados ficticios de búsqueda ni acciones de contacto habilitadas. La ficha individual y el JSON del catálogo no se crean en esta etapa.
+Propiedades, Nosotros, Servicios y Contacto son páginas mínimas con avisos de desarrollo y enlaces para volver. No hay resultados ficticios de búsqueda ni acciones de contacto habilitadas. No se crean fichas individuales ni catálogo completo. En la Etapa 2B se agrega `data/propiedades.json` con seis propiedades destacadas ficticias como base reutilizable, sin simular resultados de búsqueda.
 
 ## Contraste del botón
 
 Se conserva `#2878D0` como acento de marca. El botón usa una variante apenas más oscura, `#2676CE`, para que el texto blanco normal supere la relación mínima de contraste de 4,5:1.
+
+## Imágenes pendientes — Etapa 2B
+
+Se intentó consultar Wikimedia Commons, pero el proxy del entorno rechazó el acceso HTTP con 403. No fue posible verificar allí una fotografía y su licencia. Se conserva el fondo CSS de portada, conforme a la alternativa autorizada; no se descargaron fotografías de fuentes desconocidas ni se atribuyeron licencias supuestas.
+
+Las tarjetas destacadas se presentan sin imágenes ni bloques que simulen fotografías. El campo `imagen: null` deja explícito que el recurso está pendiente. Antes de incorporar imágenes habrá que verificar su licencia, guardar atribución y procedencia, generar tamaños optimizados y agregar textos alternativos si aportan información. Manrope continúa alojada localmente bajo la licencia ya incluida.
