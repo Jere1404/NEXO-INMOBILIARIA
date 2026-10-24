@@ -194,8 +194,12 @@ h1 { font-size: clamp(36px, 5.1vw, 68px); line-height: 1.12; letter-spacing: -.0
 .results-heading h2 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.025em; }
 .results-heading p { margin: 0; font-size: 13px; color: var(--muted); }
 .catalog-results > .section-note { margin: 16px 0 28px; }
-.catalog-results .property-card { overflow: hidden; }
-.property-image-placeholder { display: grid; place-items: center; min-height: 150px; margin: -26px -26px 24px; padding: 24px; background: linear-gradient(135deg, #e7edf4, #f3f5f7); border-bottom: 1px solid #dce2e9; color: var(--muted); font-size: 12px; }
+.property-card { overflow: hidden; }
+.property-media { position: relative; aspect-ratio: 4 / 3; flex-shrink: 0; margin: -26px -26px 24px; background: #edf1f6; border-bottom: 1px solid #dce2e9; overflow: hidden; }
+.property-media picture { position: absolute; inset: 0; display: block; }
+.property-media img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.property-image-placeholder { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: linear-gradient(135deg, #e7edf4, #f3f5f7); color: var(--muted); font-size: 12px; text-align: center; }
+.property-image-placeholder[hidden] { display: none; }
 
 @media (min-width: 48rem) {
   .catalog-intro { padding-bottom: 52px; }

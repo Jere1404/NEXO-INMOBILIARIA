@@ -48,7 +48,7 @@ Cada registro usa `id`, `titulo`, `tipo`, `operacion`, `zona` (valor de URL), `u
 - `comodidades` usa identificadores estables: `patio`, `jardin`, `cochera`, `parrilla`, `balcon`, `ascensor` y `acceso-vehicular`.
 - Habitaciones y baños son `null` en terrenos. Los alquileres se expresan por mes y la superficie total en m².
 - `ubicacionAproximada` es una referencia barrial textual, sin direcciones exactas, coordenadas de viviendas ni mapas.
-- No hay fotografías autorizadas: `imagen: null` y `fotografias: []`. No se atribuyen licencias supuestas. El catálogo muestra placeholders identificados como “Fotografía pendiente”.
+- No hay fotografías autorizadas: `imagen` con metadatos pendientes y `fotografias: []`. No se atribuyen licencias supuestas. El catálogo muestra placeholders identificados como “Fotografía pendiente”.
 
 `assets/js/property-cards.js` comparte carga, validación básica y representación de tarjetas entre `home.js` y `propiedades.js`, mediante módulos nativos. Las tarjetas son informativas, sin botones ni enlaces a fichas individuales. No se implementan fichas individuales, WhatsApp ni otras funcionalidades posteriores.
 
@@ -75,3 +75,11 @@ node --test tests/catalog-filters.test.mjs
 La suite cubre filtros individuales y combinados, límites inclusivos, terrenos, comodidades múltiples, errores de rangos, URL, monedas, ordenamiento y datos incompletos. La revisión con Chromium cubrió búsqueda desde inicio/categorías, controles, restablecimiento, historial, responsive y errores de carga. No sustituye una revisión en dispositivos físicos o navegadores adicionales.
 
 La carga necesita HTTP: abrir el HTML mediante `file://` puede impedir módulos y JSON. Con JavaScript desactivado se presenta un aviso; si falla la petición, el JSON es inválido o los datos básicos no son válidos, se muestra un error sin anunciar un contador exitoso. Todos los enlaces y recursos usan rutas relativas compatibles con GitHub Pages.
+
+## Imágenes de propiedades — V3A
+
+Soporte responsive preparado sin fotografías nuevas. Ver [contrato de imágenes](docs/IMAGENES-PROPIEDADES.md) y [estructura de recursos](assets/images/propiedades/README.md). Las doce tarjetas usan respaldos 4:3 hasta incorporar fotos autorizadas; las seis destacadas comparten ese soporte. `imagen: null` sigue siendo compatible. Pruebas: `node --test tests/*.test.mjs`.
+
+## V3B — recursos incorporados, pendientes de revisión
+
+Las doce imágenes de propiedades aportadas por el usuario están asociadas a sus identificadores; las seis destacadas utilizan las mismas referencias. Se sirven versiones WebP/JPEG optimizadas, sin cargar los PNG originales. Son ilustraciones generadas con IA de inmuebles ficticios. Las versiones corregidas de nexo-007, nexo-008, nexo-011 y nexo-012 ya se incorporaron y sus derivados se regeneraron sin carteles; los recortes y metadatos se detallan en `docs/RECURSOS.md`.

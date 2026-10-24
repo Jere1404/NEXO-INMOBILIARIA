@@ -47,13 +47,13 @@ function fillForm(filters) {
 }
 function showResults(filters) {
   const results = sortProperties(filterProperties(properties, filters), filters.orden);
-  renderPropertyCards(list, results, { showPlaceholder: true });
+  renderPropertyCards(list, results, { showPlaceholder: true, priorityImages: 1 });
   count.textContent = `${results.length} ${results.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'} de ${properties.length}`;
   empty.hidden = results.length !== 0;
   error.hidden = true; error.textContent = '';
   document.querySelector('#sort-help').textContent = filters.orden.startsWith('precio')
     ? 'Precios agrupados por moneda: primero ARS y luego USD, ordenados dentro de cada grupo. No hay conversión ni comparación entre monedas. Alquileres por mes.'
-    : 'Las fotografías están pendientes de selección y autorización. Los cambios del formulario se aplican al buscar u ordenar.';
+    : 'Imágenes ilustrativas generadas con IA. Los cambios del formulario se aplican al buscar u ordenar.';
 }
 function updateUrl(filters) {
   const query = serializeFilters(filters);
