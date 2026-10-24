@@ -65,3 +65,13 @@ test('authentication verifies server identity and enabled membership', async () 
   }
   assert.equal('signUp' in createAdminAuth(client),false);
 });
+
+test('Auth pages can opt into implicit while default clients remain PKCE', () => {
+  let options;
+  const factory=(_url,_key,opts)=>{options=opts;return {};};
+  const config={url:'https://example.test',publishableKey:'sb_publishable_test_fixture'};
+  createBackendClient(factory,config,undefined,{flowType:'implicit'});
+  assert.equal(options.auth.flowType,'implicit');assert.equal(options.auth.detectSessionInUrl,false);
+  createBackendClient(factory,config);assert.equal(options.auth.flowType,'pkce');
+  assert.throws(()=>createBackendClient(factory,config,undefined,{flowType:'unsupported'}));
+});

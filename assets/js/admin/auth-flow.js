@@ -1,14 +1,25 @@
+const validHash = value => typeof value === 'string' && /^[A-Za-z0-9_-]{16,512}$/.test(value);
+const validAccessToken = value => typeof value === 'string' && value.length <= 32768 && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
+const validRefreshToken = value => typeof value === 'string' && /^[A-Za-z0-9._~-]{8,4096}$/.test(value);
 export function readAuthLink(url) {
   const parsed = new URL(url);
   const query = parsed.searchParams;
   const hash = new URLSearchParams(parsed.hash.slice(1));
-  if (query.has('error') || hash.has('error') || query.has('error_code') || hash.has('error_code')) return { kind:'invalid' };
+  if (['error','error_code','error_description','code'].some(key => query.has(key) || hash.has(key))) return { kind:'invalid' };
+  // Bearer credentials are accepted only in the fragment, never in server-visible query strings.
+  if (query.has('access_token') || query.has('refresh_token')) return { kind:'invalid' };
   const tokens = [...query.getAll('token_hash'), ...hash.getAll('token_hash')];
   const types = [...query.getAll('type'), ...hash.getAll('type')];
-  if (query.has('access_token') || query.has('refresh_token')) return { kind:'invalid' };
-  if (!tokens.length && !types.length && !parsed.hash && !query.has('code')) return { kind:'none' };
-  if (tokens.length !== 1 || types.length !== 1 || !/^[A-Za-z0-9_-]{16,512}$/.test(tokens[0]) || !['invite','recovery'].includes(types[0])) return { kind:'invalid' };
-  return { kind:types[0], tokenHash:tokens[0] };
+  const access = hash.getAll('access_token');
+  const refresh = hash.getAll('refresh_token');
+  if (!tokens.length && !types.length && !access.length && !refresh.length && !parsed.hash) return { kind:'none' };
+  if (types.length !== 1 || !['invite','recovery'].includes(types[0])) return { kind:'invalid' };
+  if (tokens.length) {
+    if (tokens.length !== 1 || access.length || refresh.length || !validHash(tokens[0])) return { kind:'invalid' };
+    return { kind:types[0], tokenHash:tokens[0] };
+  }
+  if (access.length !== 1 || refresh.length !== 1 || !validAccessToken(access[0]) || !validRefreshToken(refresh[0])) return { kind:'invalid' };
+  return { kind:types[0], accessToken:access[0], refreshToken:refresh[0] };
 }
 export function consumeAuthLink(location, history) {
   const link = readAuthLink(location.href);
@@ -30,16 +41,27 @@ export function validatePassword(password, confirmation) {
   return '';
 }
 export async function verifyEmailLink(client, link, expectedType) {
-  if (link.kind !== expectedType || !link.tokenHash) throw new Error('Enlace inválido.');
-  const cleared = await client.auth.signOut({scope:'local'});
-  if (cleared.error) throw new Error('No se pudo preparar la sesión.');
-  const result = await client.auth.verifyOtp({token_hash:link.tokenHash,type:expectedType});
-  if (result.error || !result.data?.session || !result.data?.user) throw new Error('El enlace no es válido o ya venció.');
-  const verified = await client.auth.getUser();
-  if (verified.error || verified.data?.user?.id !== result.data.user.id) {
-    await client.auth.signOut({scope:'local'}); throw new Error('No se pudo verificar la cuenta.');
+  const hashPresent = link != null && Object.hasOwn(link, 'tokenHash');
+  const hasHash = validHash(link?.tokenHash);
+  const hasSession = validAccessToken(link?.accessToken) && validRefreshToken(link?.refreshToken);
+  if (!['invite','recovery'].includes(expectedType) || link?.kind !== expectedType
+    || (!hasHash && !hasSession) || (hashPresent && (!hasHash || link.accessToken || link.refreshToken))) throw new Error('Enlace inválido.');
+  try {
+    const cleared = await client.auth.signOut({scope:'local'});
+    if (cleared.error) throw new Error();
+    const result = hasHash
+      ? await client.auth.verifyOtp({token_hash:link.tokenHash,type:expectedType})
+      : await client.auth.setSession({access_token:link.accessToken,refresh_token:link.refreshToken});
+    if (result.error || !result.data?.session || !result.data?.user?.id) throw new Error();
+    // The type hint and JWT payload in the URL never grant identity or admin privileges.
+    const verified = await client.auth.getUser();
+    if (verified.error || !verified.data?.user?.id || verified.data.user.id !== result.data.user.id) throw new Error();
+    return verified.data.user;
+  } catch {
+    // Fail closed even if the SDK persisted a partial session before reporting an error.
+    try { await client.auth.signOut({scope:'local'}); } catch { /* Do not expose SDK/token errors. */ }
+    throw new Error('El enlace o la sesión no son válidos, o ya vencieron. Solicitá un enlace nuevo.');
   }
-  return verified.data.user;
 }
 export async function setAccountPassword(client, password, confirmation) {
   const message = validatePassword(password, confirmation);

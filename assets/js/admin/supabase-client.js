@@ -5,6 +5,6 @@ import { recoveryRedirect } from './auth-flow.js';
 
 export function getAdminClient() {
   recoveryRedirect(authConfig.siteUrl);
-  return createBackendClient(createClient, {url:authConfig.supabaseUrl,publishableKey:authConfig.publishableKey},window.sessionStorage);
+  return createBackendClient(createClient, {url:authConfig.supabaseUrl,publishableKey:authConfig.publishableKey},window.sessionStorage,{flowType:'implicit'});
 }
 export { authConfig };
