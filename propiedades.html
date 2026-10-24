@@ -30,20 +30,44 @@
         <h1 id="catalog-title">Encontrá tu próxima propiedad</h1>
         <p class="catalog-description">Casas, departamentos y terrenos para imaginar tu próximo paso. Compará espacios, zonas y características a tu ritmo.</p>
         <p class="demo-note">Proyecto ficticio de demostración. Las propiedades y los datos comerciales no representan ofertas reales.</p>
-        <aside id="search-notice" class="search-notice" aria-labelledby="search-notice-title" hidden>
-          <h2 id="search-notice-title">Tu búsqueda llegó al catálogo</h2>
-          <p>Los filtros estarán disponibles en la Etapa 3B. Los parámetros de la URL se conservan, pero todavía no se aplican: se muestra el catálogo completo, sin filtrar.</p>
-          <ul id="received-parameters" aria-label="Parámetros recibidos"></ul>
-        </aside>
+
       </div>
     </section>
-    <section class="catalog-results container" aria-labelledby="results-title">
-      <div class="results-heading"><h2 id="results-title">Explorá las propiedades</h2><p id="catalog-count" role="status"></p></div>
-      <p class="section-note">Catálogo completo de demostración, sin filtros aplicados. Las fotografías están pendientes de selección y autorización.</p>
+    <div class="container catalog-layout">
+      <details class="filter-panel" id="filter-panel">
+        <summary>Filtros de búsqueda</summary>
+        <form id="catalog-filters" action="propiedades.html" method="get">
+          <fieldset id="filter-controls" disabled>
+            <legend class="sr-only">Preferencias de búsqueda</legend>
+            <label for="filter-operation">Operación</label><select id="filter-operation" name="operacion"><option value="">Todas</option><option value="venta">Comprar</option><option value="alquiler">Alquilar</option></select>
+            <label for="filter-type">Tipo de propiedad</label><select id="filter-type" name="tipo"><option value="">Todos</option><option value="casa">Casa</option><option value="departamento">Departamento</option><option value="terreno">Terreno</option></select>
+            <label for="filter-zone">Ubicación</label><select id="filter-zone" name="zona"><option value="">Todas las zonas</option></select>
+            <label for="filter-currency">Moneda</label><select id="filter-currency" name="moneda" aria-describedby="currency-help"><option value="">Todas</option><option value="ARS">ARS · Pesos argentinos</option><option value="USD">USD · Dólares</option></select>
+            <p class="filter-help" id="currency-help">Para usar un rango de precio, elegí una moneda. No se convierten ARS y USD. Los alquileres son por mes.</p>
+            <div class="filter-pair"><div><label for="price-min">Precio mínimo</label><input id="price-min" name="precioMin" type="number" min="0" step="any" inputmode="decimal"></div><div><label for="price-max">Precio máximo</label><input id="price-max" name="precioMax" type="number" min="0" step="any" inputmode="decimal"></div></div>
+            <label for="filter-rooms">Habitaciones</label><select id="filter-rooms" name="habitaciones" aria-describedby="land-help"><option value="">Sin preferencia</option><option value="1">1 o más</option><option value="2">2 o más</option><option value="3">3 o más</option><option value="4">4 o más</option></select>
+            <label for="filter-baths">Baños</label><select id="filter-baths" name="banos" aria-describedby="land-help"><option value="">Sin preferencia</option><option value="1">1 o más</option><option value="2">2 o más</option><option value="3">3 o más</option></select>
+            <p class="filter-help" id="land-help">Al exigir habitaciones o baños, se excluyen terrenos y propiedades sin esos datos.</p>
+            <div class="filter-pair"><div><label for="area-min">Superficie mínima (m²)</label><input id="area-min" name="superficieMin" type="number" min="0" step="any" inputmode="decimal"></div><div><label for="area-max">Superficie máxima (m²)</label><input id="area-max" name="superficieMax" type="number" min="0" step="any" inputmode="decimal"></div></div>
+            <fieldset class="amenity-filters"><legend>Comodidades</legend><p class="filter-help">La propiedad debe incluir todas las seleccionadas.</p><div id="amenity-options"></div></fieldset>
+            <p id="filter-error" class="filter-error" role="alert" hidden></p>
+            <button class="button" type="submit">Aplicar filtros</button>
+            <button class="clear-button" type="button" id="clear-filters">Restablecer filtros</button>
+          </fieldset>
+        </form>
+      </details>
+    <section class="catalog-results" aria-labelledby="results-title">
+      <div class="results-heading"><h2 id="results-title" tabindex="-1">Explorá las propiedades</h2><p id="catalog-count" role="status"></p></div>
+      <label class="sort-label" for="catalog-sort">Ordenar resultados</label>
+      <select id="catalog-sort" name="orden" form="catalog-filters" disabled><option value="">Orden original</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="superficie-asc">Superficie: menor a mayor</option><option value="superficie-desc">Superficie: mayor a menor</option></select>
+      <p id="sort-help" class="section-note">Las fotografías están pendientes de selección y autorización.</p>
+      <p id="url-notice" class="demo-note" role="status" hidden></p>
+      <div id="empty-results" class="empty-results" hidden><p>No encontramos propiedades con esas características. Probá modificando algunos filtros.</p><button class="button" type="button" id="clear-empty">Limpiar búsqueda</button></div>
       <p id="catalog-status" class="load-status" role="status" hidden></p>
       <noscript><p class="demo-note">Activá JavaScript para cargar las propiedades del catálogo. Podés continuar navegando por el sitio o volver al inicio.</p></noscript>
       <ul id="catalog-properties" class="property-grid" aria-label="Catálogo de propiedades ficticias"></ul>
     </section>
+    </div>
   </main>
   <footer class="site-footer home-footer">
     <div class="container">
