@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https://*.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>Administración | NEXO Inmobiliaria</title>
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/admin-panel.css">
+  <script type="module" src="../assets/js/admin/properties-page.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="panel-header"><div class="container panel-header-inner"><a class="brand" href="../index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a><a class="public-site-link" href="../index.html">Ver sitio público</a><div id="admin-session" class="panel-session" hidden><span id="admin-identity"></span><button id="admin-logout" class="secondary-button" type="button">Cerrar sesión</button></div></div></header>
+  <main id="contenido" class="container panel-main" tabindex="-1">
+    <section id="access-state" class="access-state" aria-labelledby="access-title"><p class="eyebrow">NEXO · ADMINISTRACIÓN</p><h1 id="access-title">Verificando acceso</h1><p id="panel-status" role="status" aria-live="polite">Comprobando tu sesión y permisos…</p><a id="access-login" class="button" href="login.html" hidden>Ir al inicio de sesión</a><button id="access-retry" class="secondary-button" type="button" hidden>Reintentar</button></section>
+    <noscript><p>Activá JavaScript e iniciá sesión para acceder al panel. <a href="login.html">Ir al acceso</a>.</p></noscript>
+    <div id="admin-content" hidden>
+      <nav class="panel-nav" aria-label="Navegación administrativa"><a href="#listado" aria-current="page">Propiedades</a><span>Panel de administración</span></nav>
+      <div class="panel-heading"><div><p class="eyebrow">TU CARTERA, EN UN SOLO LUGAR</p><h1>Propiedades</h1><p>Revisá tus publicaciones y encontrá cada inmueble.</p></div><span class="read-only-label">Solo lectura</span></div>
+      <section class="indicator-grid" aria-label="Resumen general de propiedades"><article><h2>Total de propiedades</h2><p id="indicator-total">—</p></article><article><h2>Publicadas</h2><p id="indicator-published">—</p></article><article><h2>Borradores</h2><p id="indicator-draft">—</p></article></section>
+      <p class="panel-note">Los indicadores resumen toda la cartera; los filtros solo afectan el listado. El total incluye las archivadas.</p>
+      <section id="listado" class="admin-list" aria-labelledby="list-title">
+        <div class="list-heading"><h2 id="list-title" tabindex="-1">Listado de propiedades</h2><button id="refresh-list" class="secondary-button" type="button">Actualizar</button></div>
+        <form id="admin-search"><fieldset id="search-controls" disabled><legend class="sr-only">Buscar y filtrar propiedades</legend><div class="panel-search"><label for="property-search">Título o código</label><input id="property-search" name="search" type="search" maxlength="100" placeholder="Ej.: Molina Punta o nexo-001"></div><div><label for="property-status">Estado</label><select id="property-status" name="status"><option value="">Todos los estados</option><option value="published">Publicadas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select></div><div><label for="property-type">Tipo</label><select id="property-type" name="type"><option value="">Todos los tipos</option><option value="casa">Casa</option><option value="departamento">Departamento</option><option value="terreno">Terreno</option></select></div><button class="button" type="submit">Buscar</button><button id="reset-search" class="secondary-button" type="button">Limpiar</button></fieldset></form>
+        <p id="list-status" class="list-status" role="status" aria-live="polite"></p>
+        <div id="properties-table-wrap"><table class="admin-table" role="table"><caption class="sr-only">Propiedades administradas. Fechas en horario de Argentina.</caption><thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Propiedad</th><th scope="col" role="columnheader">Tipo</th><th scope="col" role="columnheader">Operación</th><th scope="col" role="columnheader">Precio</th><th scope="col" role="columnheader">Estado</th><th scope="col" role="columnheader">Actualización</th></tr></thead><tbody id="admin-properties" role="rowgroup"></tbody></table></div>
+        <p id="list-empty" class="empty-list" hidden>No encontramos propiedades para esta búsqueda. Probá cambiando los filtros.</p>
+        <nav class="panel-pagination" aria-label="Paginación de propiedades"><button id="previous-page" class="secondary-button" type="button" disabled>Anterior</button><p id="page-description"></p><button id="next-page" class="secondary-button" type="button" disabled>Siguiente</button></nav>
+      </section>
+      <p class="panel-note future-note">La creación, edición y publicación desde este panel estarán disponibles en una próxima etapa.</p>
+    </div>
+  </main>
+  <footer class="container panel-footer">NEXO Inmobiliaria · Administración</footer>
+</body>
+</html>
