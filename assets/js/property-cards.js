@@ -53,7 +53,7 @@ export function getPropertyImage(image) {
   return { ...image, webp: variants(image.webp, 'webp'), jpeg: variants(image.jpeg, 'jpe?g') };
 }
 
-function createPropertyMedia(image, { priority, sizes }) {
+export function createPropertyMedia(image, { priority = false, sizes = '100vw' } = {}) {
   const media = element('div', 'property-media');
   const fallback = element('div', 'property-image-placeholder', 'Fotografía no disponible');
   media.append(fallback);
@@ -88,7 +88,7 @@ function createPropertyMedia(image, { priority, sizes }) {
 }
 
 // Shared rendering keeps prices, labels and applicable features consistent.
-// Cards are informational: no fake detail links or keyboard stops are added.
+// Each card links to the shared detail template using its stable identifier.
 export function renderPropertyCards(list, properties, { showPlaceholder = true, priorityImages = 0 } = {}) {
   const number = new Intl.NumberFormat('es-AR');
   const fragment = document.createDocumentFragment();
@@ -115,6 +115,10 @@ export function renderPropertyCards(list, properties, { showPlaceholder = true, 
     if (property.banos !== null) values.push(`${property.banos} ${property.banos === 1 ? 'baño' : 'baños'}`);
     for (const value of values) features.append(element('li', '', value));
     card.append(features, element('p', 'property-disclaimer', 'Propiedad ficticia · Imagen ilustrativa generada con IA'));
+    const link = element('a', 'property-details-link', 'Ver propiedad');
+    link.href = `propiedad.html?id=${encodeURIComponent(property.id)}`;
+    link.setAttribute('aria-label', `Ver propiedad: ${property.titulo}`);
+    card.append(link);
     item.append(card);
     fragment.append(item);
   }

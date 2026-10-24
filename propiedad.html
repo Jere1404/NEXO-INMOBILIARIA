@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NEXO Inmobiliaria. Proyecto de demostración en Corrientes Capital. Tu próximo hogar comienza acá.">
+  <title>Ficha de propiedad | NEXO Inmobiliaria</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/propiedad.js" type="module"></script>
+  <link rel="stylesheet" href="assets/css/propiedad.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" hidden><span class="menu-icon" aria-hidden="true"></span><span>Menú</span></button>
+      <nav id="main-nav" class="main-nav" aria-label="Navegación principal"><a href="index.html">Inicio</a>
+<a href="propiedades.html">Propiedades</a>
+<a href="nosotros.html">Nosotros</a>
+<a href="servicios.html">Servicios</a>
+<a href="contacto.html">Contacto</a></nav>
+    </div>
+  </header>
+  <main id="contenido" class="detail-page container" tabindex="-1">
+    <nav class="detail-breadcrumb" aria-label="Ruta de navegación"><a href="index.html">Inicio</a><span aria-hidden="true">/</span><a href="propiedades.html">Propiedades</a><span aria-hidden="true">/</span><span>Ficha de propiedad</span></nav>
+    <p id="detail-status" class="detail-status" role="status">Cargando información de la propiedad…</p>
+    <noscript><p class="demo-note">Activá JavaScript para consultar la ficha. Podés volver al catálogo desde la navegación.</p></noscript>
+    <section id="detail-error" class="detail-error" aria-labelledby="error-title" hidden>
+      <h1 id="error-title">No pudimos mostrar la propiedad</h1><p id="error-description"></p><a class="button" href="propiedades.html">Volver al catálogo</a>
+    </section>
+    <article id="property-detail" hidden>
+      <header class="detail-heading"><p id="detail-operation" class="eyebrow"></p><h1 id="detail-title"></h1><p id="detail-location" class="detail-location"></p></header>
+      <p class="demo-note detail-demo">Proyecto ficticio de demostración. Las propiedades y los datos comerciales no representan ofertas reales. Las imágenes son ilustrativas y generadas con IA.</p>
+      <div class="detail-layout">
+        <div>
+          <section class="detail-gallery" aria-labelledby="gallery-title">
+            <h2 id="gallery-title" class="sr-only">Imágenes de referencia</h2>
+            <figure><div id="gallery-image"></div><figcaption id="gallery-caption"></figcaption></figure>
+            <div id="gallery-controls" class="gallery-controls" role="group" aria-label="Seleccionar imagen" hidden></div>
+            <p id="gallery-status" class="sr-only" role="status"></p>
+          </section>
+          <section class="detail-section" aria-labelledby="description-title"><h2 id="description-title">Conocé este espacio</h2><p id="detail-description"></p></section>
+          <section class="detail-section" aria-labelledby="amenities-title"><h2 id="amenities-title">Comodidades</h2><ul id="detail-amenities" class="detail-amenities"></ul><p id="no-amenities" hidden>No se informaron comodidades adicionales.</p></section>
+          <section class="detail-section" aria-labelledby="location-title"><h2 id="location-title">Ubicación aproximada</h2><p id="detail-approximate"></p></section>
+        </div>
+        <aside class="detail-summary" aria-labelledby="summary-title">
+          <h2 id="summary-title">Información de la propiedad</h2>
+          <p id="detail-price" class="detail-price"></p><p id="detail-id" class="section-note"></p>
+          <dl id="detail-features" class="detail-features"></dl>
+          <h3>Consultá por esta propiedad</h3><p class="filter-help">La consulta incluye el nombre, el código y el enlace de esta propiedad.</p>
+          <a id="whatsapp-link" class="button" hidden>Consultar por WhatsApp</a>
+          <button id="whatsapp-disabled" class="button" type="button" disabled aria-describedby="whatsapp-help">Consultar por WhatsApp</button>
+          <p id="whatsapp-help" class="filter-help">Las consultas por WhatsApp todavía no están habilitadas en esta demostración.</p>
+          <label class="inquiry-label" for="inquiry-message">Mensaje de consulta preparado</label><textarea id="inquiry-message" rows="6" readonly></textarea>
+        </aside>
+      </div>
+    </article>
+    <section id="similar-section" class="similar-section" aria-labelledby="similar-title" hidden><div class="section-heading"><p class="eyebrow">SEGUÍ EXPLORANDO</p><h2 id="similar-title">Propiedades similares</h2><p>Opciones relacionadas por tipo, operación y zona.</p></div><ul id="similar-properties" class="property-grid" aria-label="Propiedades similares de demostración"></ul></section>
+  </main>
+  <footer class="site-footer home-footer">
+    <div class="container">
+      <div class="home-footer-top">
+        <div><a class="brand" href="index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a><p>Tu próximo hogar comienza acá.</p></div>
+        <nav class="footer-nav" aria-label="Navegación secundaria"><a href="index.html">Inicio</a><a href="propiedades.html">Propiedades</a><a href="nosotros.html">Nosotros</a><a href="servicios.html">Servicios</a><a href="contacto.html">Contacto</a></nav>
+        <p class="footer-location">Corrientes Capital,<br>Argentina.</p>
+      </div>
+      <p class="footer-disclaimer">Proyecto ficticio de demostración. Las propiedades y los datos comerciales no representan ofertas reales. Las imágenes del catálogo son ilustrativas y generadas con IA.</p>
+    </div>
+  </footer>
+</body>
+</html>
