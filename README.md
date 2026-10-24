@@ -83,3 +83,15 @@ Soporte responsive preparado sin fotografías nuevas. Ver [contrato de imágenes
 ## V3B — recursos incorporados, pendientes de revisión
 
 Las doce imágenes de propiedades aportadas por el usuario están asociadas a sus identificadores; las seis destacadas utilizan las mismas referencias. Se sirven versiones WebP/JPEG optimizadas, sin cargar los PNG originales. Son ilustraciones generadas con IA de inmuebles ficticios. Las versiones corregidas de nexo-007, nexo-008, nexo-011 y nexo-012 ya se incorporaron y sus derivados se regeneraron sin carteles; los recortes y metadatos se detallan en `docs/RECURSOS.md`.
+
+## V5A — backend preparado, todavía sin conectar
+
+Se prepararon migraciones PostgreSQL/RLS, importación idempotente de las doce propiedades como borradores, módulos inactivos de autenticación y acceso a datos, y pruebas de seguridad. La web pública continúa usando el JSON y las fotografías locales; no requiere claves ni tiene conexión activa con Supabase.
+
+Ver [configuración y pruebas de Supabase V5A](docs/SUPABASE-V5A.md). Tests de aplicación: `node --test tests/*.test.mjs`. Pruebas SQL locales: `npm ci --prefix supabase/tests` y `npm test --prefix supabase/tests`. No se creó un proyecto remoto ni se aplicaron migraciones o cambios de autenticación reales.
+
+## V5A.1 — páginas de acceso preparadas
+
+Páginas `admin/activar.html`, `admin/login.html` y `admin/recuperar.html`, con SDK oficial fijado y servido localmente. La configuración de `admin/config.js` está vacía: no hay conexión real ni registro público o alta automática de administradores. Ver [configuración y flujos de Auth](docs/SUPABASE-AUTH-V5A1.md).
+
+Build local: `npm ci --ignore-scripts` y `npm run build:auth`. Pruebas: `npm test`. La publicación y los cambios de configuración de Supabase requieren autorización separada. Los cambios pendientes de V5A se conservaron, sin commits ni operaciones remotas de base de datos.
