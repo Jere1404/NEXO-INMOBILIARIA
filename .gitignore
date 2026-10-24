@@ -1,0 +1,6 @@
+
+# Local SQL security-test dependency
+supabase/tests/node_modules/
+
+# npm application/build dependencies
+/node_modules/
