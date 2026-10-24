@@ -6,7 +6,7 @@ Proyecto de portfolio y demostración comercial para una inmobiliaria ficticia d
 
 ## Estado actual
 
-**Etapa 2B: inicio ampliado, pendiente de revisión.** Encabezado, portada y buscador conservados; agregadas seis propiedades destacadas de demostración, categorías, valores, servicios, contacto y footer completo. La Etapa 1 fue aprobada. El catálogo y las páginas Nosotros, Servicios y Contacto son provisionales; no muestran resultados ni contenido definitivo.
+**Etapa 3B: búsqueda y filtros implementados, pendientes de revisión.** El catálogo contiene 12 propiedades ficticias. Permite combinar operación, tipo, zona, moneda, precios, habitaciones, baños, superficie y comodidades, además de ordenar y restablecer la búsqueda. El inicio conserva sus seis destacadas y su buscador. Nosotros, Servicios y Contacto siguen siendo provisionales.
 
 El alcance, la identidad visual, la navegación, la estructura de archivos propuesta y los criterios de finalización están en [docs/PLAN-MAESTRO.md](docs/PLAN-MAESTRO.md).
 
@@ -24,7 +24,7 @@ python -m http.server 8000 --bind 127.0.0.1
 
 Abrir el servidor en un navegador local. Detenerlo con `Ctrl+C`. En GitHub Pages, servir la raíz del repositorio; todos los recursos y enlaces usan rutas relativas, compatibles con su subdirectorio. La publicación todavía no forma parte de esta entrega.
 
-El buscador usa GET hacia `propiedades.html`, con `operacion=venta|alquiler`, `tipo=casa|departamento|terreno` y `zona=` (todas), `centro`, `camba-cua`, `costanera`, `camba-punta` o `molina-punta`. Ejemplo: `propiedades.html?operacion=venta&tipo=casa&zona=centro`. No se simulan resultados. El buscador no requiere JavaScript. JavaScript mejora el menú móvil y carga las seis tarjetas del inicio desde JSON; si se desactiva o falla la carga, se muestra un aviso y los enlaces por categoría siguen disponibles.
+El buscador usa GET hacia `propiedades.html`, con `operacion=venta|alquiler`, `tipo=casa|departamento|terreno` y `zona=` (todas), `centro`, `camba-cua`, `costanera`, `camba-punta` o `molina-punta`. Ejemplo: `propiedades.html?operacion=venta&tipo=casa&zona=centro`. Los parámetros se aplican automáticamente y se reflejan en los controles del catálogo. El buscador no requiere JavaScript. JavaScript mejora el menú móvil y carga las tarjetas del inicio y del catálogo desde JSON; si se desactiva o falla la carga, se muestra un aviso y los enlaces por categoría siguen disponibles.
 
 Manrope se sirve localmente con licencia OFL. El hero usa un fondo CSS provisional: falta seleccionar una fotografía autorizada y optimizada. Véase [docs/RECURSOS.md](docs/RECURSOS.md).
 
@@ -36,12 +36,42 @@ Los inmuebles y sus datos serán ficticios y se identificarán como demostració
 
 ## Flujo de trabajo
 
-El desarrollo de esta etapa se realiza exclusivamente en `feature/nexo-home-hero`. No se realizan commits, push, Pull Requests ni merges automáticos. El siguiente paso requiere aprobación explícita del responsable del proyecto.
+El desarrollo de esta etapa se realiza exclusivamente en `feature/nexo-catalogo`. No se realizan commits, push, Pull Requests ni merges automáticos. El siguiente paso requiere aprobación explícita del responsable del proyecto.
 
-## Datos de propiedades destacadas
+## Datos del catálogo
 
-`data/propiedades.json` contiene solo seis registros de demostración (dos casas, tres departamentos y un terreno), no el catálogo final de 12 inmuebles. `assets/js/home.js` renderiza las tarjetas sin enlaces a fichas individuales.
+`data/propiedades.json` contiene exactamente 12 registros ficticios: cuatro casas, cinco departamentos y tres terrenos. Los seis identificadores iniciales y sus datos previos se conservan. Solo esos seis registros tienen `destacada: true`.
 
-Cada registro usa un `id` estable y campos `titulo`, `tipo`, `operacion`, `zona` (los mismos valores de URL del buscador), `ubicacion` (nombre visible de la zona), `ciudad`, `precio`, `moneda` (`ARS` o `USD`), `superficie`, `unidadSuperficie`, `habitaciones`, `banos`, `destacada`, `ficticia` e `imagen`. `null` indica un dato no aplicable o una imagen pendiente. Los alquileres se expresan por mes; la superficie se expresa en m² y representa superficie total de demostración. No hay direcciones exactas ni ofertas reales.
+Cada registro usa `id`, `titulo`, `tipo`, `operacion`, `zona` (valor de URL), `ubicacion` (nombre visible de la zona), `ciudad`, `precio`, `moneda` (`ARS` o `USD`), `superficie`, `unidadSuperficie`, `habitaciones`, `banos`, `comodidades`, `descripcion`, `ubicacionAproximada`, `destacada`, `ficticia`, `imagen` y `fotografias`.
 
-Para integrar posteriormente los 12 inmuebles se podrán conservar estos identificadores, completar los campos adicionales y agregar seis registros respetando la distribución del plan maestro. El inicio selecciona hasta seis registros con `destacada: true` y `ficticia: true`. La carga usa rutas relativas y necesita un servidor HTTP, como el comando anterior; abrir directamente el HTML mediante `file://` puede impedir la lectura de JSON.
+- Los tipos son `casa`, `departamento` y `terreno`; operaciones y zonas mantienen los valores del buscador.
+- `comodidades` usa identificadores estables: `patio`, `jardin`, `cochera`, `parrilla`, `balcon`, `ascensor` y `acceso-vehicular`.
+- Habitaciones y baños son `null` en terrenos. Los alquileres se expresan por mes y la superficie total en m².
+- `ubicacionAproximada` es una referencia barrial textual, sin direcciones exactas, coordenadas de viviendas ni mapas.
+- No hay fotografías autorizadas: `imagen: null` y `fotografias: []`. No se atribuyen licencias supuestas. El catálogo muestra placeholders identificados como “Fotografía pendiente”.
+
+`assets/js/property-cards.js` comparte carga, validación básica y representación de tarjetas entre `home.js` y `propiedades.js`, mediante módulos nativos. Las tarjetas son informativas, sin botones ni enlaces a fichas individuales. No se implementan fichas individuales, WhatsApp ni otras funcionalidades posteriores.
+
+`assets/js/catalog-filters.js` separa el análisis de parámetros, validación, filtrado, ordenamiento y serialización de la interfaz en `propiedades.js`. La lógica no modifica el JSON original.
+
+## Búsqueda y monedas — Etapa 3B
+
+Los filtros se combinan con **AND**; todas las comodidades marcadas deben estar presentes. Los límites de precio y superficie son inclusivos. Los mínimos de habitaciones y baños excluyen terrenos y registros sin ese dato. Zonas y comodidades se obtienen de los datos cargados.
+
+Para precios se debe elegir `ARS` o `USD` antes de aplicar un rango. Los rangos invertidos se rechazan; el formulario conserva los resultados anteriores e informa el error. Los alquileres se expresan por mes. Sin filtro de moneda, el orden por precio agrupa primero ARS y luego USD y ordena dentro de cada grupo; nunca convierte ni compara ambas monedas como equivalentes. El orden por superficie funciona sobre todos los resultados, en m². Las tarjetas mantienen visible la moneda y la periodicidad del alquiler.
+
+Además de `operacion`, `tipo` y `zona`, se admiten `moneda`, `precioMin`, `precioMax`, `habitaciones`, `banos`, `superficieMin`, `superficieMax`, `comodidad` (repetido por cada selección) y `orden` (`precio-asc`, `precio-desc`, `superficie-asc`, `superficie-desc`). Un parámetro simple repetido usa su primer valor. Valores desconocidos o negativos de URL se ignoran con aviso; los rangos contradictorios o precios sin moneda requieren corrección antes de mostrar resultados.
+
+Al aplicar o restablecer filtros se actualizan tarjetas, contador y URL. Atrás/adelante restaura la búsqueda. Cambiar el orden también aplica las preferencias actuales. Restablecer elimina filtros, orden y parámetros de búsqueda. En celulares el formulario se abre desde “Filtros de búsqueda” y se cierra al aplicar; en escritorio se abre inicialmente junto a los resultados. Los controles permanecen deshabilitados hasta cargar datos válidos. Los avisos de carga, error y cantidad de resultados son accesibles.
+
+## Verificaciones
+
+Desde la raíz del repositorio, sin instalar dependencias:
+
+```bash
+node --test tests/catalog-filters.test.mjs
+```
+
+La suite cubre filtros individuales y combinados, límites inclusivos, terrenos, comodidades múltiples, errores de rangos, URL, monedas, ordenamiento y datos incompletos. La revisión con Chromium cubrió búsqueda desde inicio/categorías, controles, restablecimiento, historial, responsive y errores de carga. No sustituye una revisión en dispositivos físicos o navegadores adicionales.
+
+La carga necesita HTTP: abrir el HTML mediante `file://` puede impedir módulos y JSON. Con JavaScript desactivado se presenta un aviso; si falla la petición, el JSON es inválido o los datos básicos no son válidos, se muestra un error sin anunciar un contador exitoso. Todos los enlaces y recursos usan rutas relativas compatibles con GitHub Pages.

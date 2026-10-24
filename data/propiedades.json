@@ -15,7 +15,15 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null
+    "imagen": null,
+    "comodidades": [
+      "patio",
+      "cochera",
+      "parrilla"
+    ],
+    "descripcion": "Casa ficticia con ambientes amplios, patio y espacio para estacionar. Una propuesta de demostración para imaginar una nueva etapa en Molina Punta.",
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
   {
     "id": "nexo-002",
@@ -33,7 +41,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null
+    "imagen": null,
+    "comodidades": [
+      "balcon",
+      "ascensor"
+    ],
+    "descripcion": "Departamento ficticio con dos habitaciones y balcón. Datos ilustrativos para explorar una alternativa de alquiler en el Centro.",
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Centro, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
   {
     "id": "nexo-003",
@@ -51,7 +66,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null
+    "imagen": null,
+    "comodidades": [
+      "balcon",
+      "ascensor"
+    ],
+    "descripcion": "Departamento ficticio de una habitación, con distribución compacta y balcón. Ejemplo de venta en la zona de Cambá Cuá.",
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Cambá Cuá, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
   {
     "id": "nexo-004",
@@ -69,7 +91,14 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null
+    "imagen": null,
+    "comodidades": [
+      "patio",
+      "cochera"
+    ],
+    "descripcion": "Casa ficticia con tres habitaciones, dos baños y patio. Datos de demostración para una alternativa de vivienda en Camba Punta.",
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
   {
     "id": "nexo-005",
@@ -87,7 +116,13 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null
+    "imagen": null,
+    "comodidades": [
+      "acceso-vehicular"
+    ],
+    "descripcion": "Lote ficticio de 360 m² para imaginar un proyecto propio. No representa una parcela real ni certifica aptitud constructiva o servicios.",
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   },
   {
     "id": "nexo-006",
@@ -105,6 +140,162 @@
     "unidadSuperficie": "m²",
     "destacada": true,
     "ficticia": true,
-    "imagen": null
+    "imagen": null,
+    "comodidades": [
+      "balcon",
+      "ascensor",
+      "cochera"
+    ],
+    "descripcion": "Departamento ficticio de dos habitaciones en zona Costanera. La zona es una referencia general, sin atribuir el inmueble a un edificio real.",
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Costanera, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
+  },
+  {
+    "id": "nexo-007",
+    "titulo": "Casa con jardín en Camba Punta",
+    "tipo": "casa",
+    "operacion": "alquiler",
+    "zona": "camba-punta",
+    "ubicacion": "Camba Punta",
+    "precio": 850000,
+    "moneda": "ARS",
+    "superficie": 165,
+    "habitaciones": 3,
+    "banos": 2,
+    "comodidades": [
+      "jardin",
+      "cochera"
+    ],
+    "descripcion": "Casa ficticia con jardín y cochera. Una opción de alquiler ilustrativa para comparar espacios y características.",
+    "ciudad": "Corrientes Capital",
+    "unidadSuperficie": "m²",
+    "destacada": false,
+    "ficticia": true,
+    "imagen": null,
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
+  },
+  {
+    "id": "nexo-008",
+    "titulo": "Casa familiar en Molina Punta",
+    "tipo": "casa",
+    "operacion": "venta",
+    "zona": "molina-punta",
+    "ubicacion": "Molina Punta",
+    "precio": 172000,
+    "moneda": "USD",
+    "superficie": 220,
+    "habitaciones": 4,
+    "banos": 3,
+    "comodidades": [
+      "patio",
+      "cochera",
+      "parrilla"
+    ],
+    "descripcion": "Casa ficticia de cuatro habitaciones y espacios exteriores. Precio y características creados exclusivamente para esta demostración.",
+    "ciudad": "Corrientes Capital",
+    "unidadSuperficie": "m²",
+    "destacada": false,
+    "ficticia": true,
+    "imagen": null,
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
+  },
+  {
+    "id": "nexo-009",
+    "titulo": "Departamento de una habitación en Centro",
+    "tipo": "departamento",
+    "operacion": "venta",
+    "zona": "centro",
+    "ubicacion": "Centro",
+    "precio": 72000,
+    "moneda": "USD",
+    "superficie": 45,
+    "habitaciones": 1,
+    "banos": 1,
+    "comodidades": [
+      "ascensor"
+    ],
+    "descripcion": "Departamento ficticio de una habitación. Una alternativa compacta de demostración en una zona central de la ciudad.",
+    "ciudad": "Corrientes Capital",
+    "unidadSuperficie": "m²",
+    "destacada": false,
+    "ficticia": true,
+    "imagen": null,
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Centro, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
+  },
+  {
+    "id": "nexo-010",
+    "titulo": "Departamento con balcón en Cambá Cuá",
+    "tipo": "departamento",
+    "operacion": "alquiler",
+    "zona": "camba-cua",
+    "ubicacion": "Cambá Cuá",
+    "precio": 520000,
+    "moneda": "ARS",
+    "superficie": 58,
+    "habitaciones": 1,
+    "banos": 1,
+    "comodidades": [
+      "balcon",
+      "ascensor"
+    ],
+    "descripcion": "Departamento ficticio con balcón y una habitación. La ubicación identifica únicamente la zona, sin señalar un edificio concreto.",
+    "ciudad": "Corrientes Capital",
+    "unidadSuperficie": "m²",
+    "destacada": false,
+    "ficticia": true,
+    "imagen": null,
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Cambá Cuá, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
+  },
+  {
+    "id": "nexo-011",
+    "titulo": "Terreno para proyectar en Camba Punta",
+    "tipo": "terreno",
+    "operacion": "venta",
+    "zona": "camba-punta",
+    "ubicacion": "Camba Punta",
+    "precio": 35000,
+    "moneda": "USD",
+    "superficie": 300,
+    "habitaciones": null,
+    "banos": null,
+    "comodidades": [
+      "acceso-vehicular"
+    ],
+    "descripcion": "Terreno ficticio de 300 m². Sus medidas son ilustrativas y no acreditan disponibilidad, servicios ni condiciones de edificación.",
+    "ciudad": "Corrientes Capital",
+    "unidadSuperficie": "m²",
+    "destacada": false,
+    "ficticia": true,
+    "imagen": null,
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Camba Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
+  },
+  {
+    "id": "nexo-012",
+    "titulo": "Lote amplio en Molina Punta",
+    "tipo": "terreno",
+    "operacion": "venta",
+    "zona": "molina-punta",
+    "ubicacion": "Molina Punta",
+    "precio": 58000,
+    "moneda": "USD",
+    "superficie": 480,
+    "habitaciones": null,
+    "banos": null,
+    "comodidades": [
+      "acceso-vehicular"
+    ],
+    "descripcion": "Lote ficticio de 480 m² para comparar superficies. No corresponde a una parcela real ni representa una oferta comercial.",
+    "ciudad": "Corrientes Capital",
+    "unidadSuperficie": "m²",
+    "destacada": false,
+    "ficticia": true,
+    "imagen": null,
+    "fotografias": [],
+    "ubicacionAproximada": "Zona Molina Punta, Corrientes Capital, Argentina. Referencia barrial; no corresponde a una dirección exacta."
   }
 ]

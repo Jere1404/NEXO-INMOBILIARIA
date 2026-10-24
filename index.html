@@ -7,7 +7,7 @@
   <title>Inicio | NEXO Inmobiliaria</title>
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/main.js" defer></script>
-  <script src="assets/js/home.js" defer></script>
+  <script src="assets/js/home.js" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -52,18 +52,6 @@
         <p id="featured-status" class="load-status" role="status" hidden></p>
         <noscript><p class="demo-note">Activá JavaScript para ver las seis propiedades de demostración. Podés seguir usando el buscador y los enlaces por categoría sin JavaScript.</p></noscript>
         <ul id="featured-properties" class="property-grid" aria-label="Propiedades destacadas de demostración"></ul>
-        <template id="property-card-template">
-          <li>
-            <article class="property-card">
-              <div class="property-meta"><span class="property-type"></span><span class="operation-badge"></span></div>
-              <p class="property-location"></p>
-              <h3 class="property-title"></h3>
-              <p class="property-price"></p>
-              <ul class="property-features" aria-label="Características"></ul>
-              <p class="property-disclaimer">Propiedad ficticia · Demostración</p>
-            </article>
-          </li>
-        </template>
       </div>
     </section>
 
@@ -75,7 +63,7 @@
           <a class="category-card" href="propiedades.html?tipo=departamento"><h3>Departamentos</h3><p>Tu lugar, al ritmo de la ciudad.</p><span>Explorar departamentos <span aria-hidden="true">→</span></span></a>
           <a class="category-card" href="propiedades.html?tipo=terreno"><h3>Terrenos</h3><p>El comienzo de tu próximo proyecto.</p><span>Explorar terrenos <span aria-hidden="true">→</span></span></a>
         </div>
-        <p class="section-note">El catálogo está en desarrollo. Estos enlaces conservan el tipo elegido en la URL.</p>
+        <p class="section-note">Explorá el catálogo con el tipo de propiedad que elegiste.</p>
       </div>
     </section>
 
