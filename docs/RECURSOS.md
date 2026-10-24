@@ -29,3 +29,7 @@ Se conserva `#2878D0` como acento de marca. El botón usa una variante apenas m�
 Se intentó consultar Wikimedia Commons, pero el proxy del entorno rechazó el acceso HTTP con 403. No fue posible verificar allí una fotografía y su licencia. Se conserva el fondo CSS de portada, conforme a la alternativa autorizada; no se descargaron fotografías de fuentes desconocidas ni se atribuyeron licencias supuestas.
 
 Las tarjetas destacadas se presentan sin imágenes ni bloques que simulen fotografías. El campo `imagen: null` deja explícito que el recurso está pendiente. Antes de incorporar imágenes habrá que verificar su licencia, guardar atribución y procedencia, generar tamaños optimizados y agregar textos alternativos si aportan información. Manrope continúa alojada localmente bajo la licencia ya incluida.
+
+## Catálogo visual — Etapa 3A
+
+El catálogo mantiene la ausencia de fotografías sin licencia verificada. Cada tarjeta muestra un placeholder CSS con el texto “Fotografía pendiente”; no es una imagen del inmueble. Los datos ahora contienen 12 propiedades ficticias, sin atribuir ofertas reales a direcciones concretas. Las seis destacadas del inicio conservan su presentación sin fotografías. Antes de incorporar fotografías habrá que documentar fuente, licencia, atribución, tamaños optimizados y textos alternativos.

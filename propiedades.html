@@ -7,6 +7,7 @@
   <title>Propiedades | NEXO Inmobiliaria</title>
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/propiedades.js" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -21,15 +22,38 @@
 <a href="contacto.html">Contacto</a></nav>
     </div>
   </header>
-  <main id="contenido" class="placeholder container" tabindex="-1">
-    <p class="eyebrow">NEXO INMOBILIARIA · DEMOSTRACIÓN</p>
-    <p class="status-label">Página provisional</p>
-    <h1>Propiedades</h1>
-    <p class="placeholder-description">El catálogo de propiedades se encuentra en desarrollo. El buscador conserva los filtros seleccionados en la URL; todavía no se muestran resultados.</p>
-    <a class="button" href="index.html">Volver al inicio</a>
+  <main id="contenido" tabindex="-1">
+    <section class="catalog-intro" aria-labelledby="catalog-title">
+      <div class="container">
+        <a class="text-link" href="index.html">Volver al inicio</a>
+        <p class="eyebrow">NEXO INMOBILIARIA · CORRIENTES CAPITAL</p>
+        <h1 id="catalog-title">Encontrá tu próxima propiedad</h1>
+        <p class="catalog-description">Casas, departamentos y terrenos para imaginar tu próximo paso. Compará espacios, zonas y características a tu ritmo.</p>
+        <p class="demo-note">Proyecto ficticio de demostración. Las propiedades y los datos comerciales no representan ofertas reales.</p>
+        <aside id="search-notice" class="search-notice" aria-labelledby="search-notice-title" hidden>
+          <h2 id="search-notice-title">Tu búsqueda llegó al catálogo</h2>
+          <p>Los filtros estarán disponibles en la Etapa 3B. Los parámetros de la URL se conservan, pero todavía no se aplican: se muestra el catálogo completo, sin filtrar.</p>
+          <ul id="received-parameters" aria-label="Parámetros recibidos"></ul>
+        </aside>
+      </div>
+    </section>
+    <section class="catalog-results container" aria-labelledby="results-title">
+      <div class="results-heading"><h2 id="results-title">Explorá las propiedades</h2><p id="catalog-count" role="status"></p></div>
+      <p class="section-note">Catálogo completo de demostración, sin filtros aplicados. Las fotografías están pendientes de selección y autorización.</p>
+      <p id="catalog-status" class="load-status" role="status" hidden></p>
+      <noscript><p class="demo-note">Activá JavaScript para cargar las propiedades del catálogo. Podés continuar navegando por el sitio o volver al inicio.</p></noscript>
+      <ul id="catalog-properties" class="property-grid" aria-label="Catálogo de propiedades ficticias"></ul>
+    </section>
   </main>
-  <footer class="site-footer">
-    <div class="container footer-inner"><p class="footer-signature">NEXO <span>Tu próximo hogar comienza acá.</span></p><p>Proyecto de demostración · Inmobiliaria e inmuebles ficticios.</p></div>
+  <footer class="site-footer home-footer">
+    <div class="container">
+      <div class="home-footer-top">
+        <div><a class="brand" href="index.html" aria-label="NEXO Inmobiliaria — Inicio"><span class="brand-name">NEXO<span class="brand-dot">.</span></span><span class="brand-caption">INMOBILIARIA</span></a><p>Tu próximo hogar comienza acá.</p></div>
+        <nav class="footer-nav" aria-label="Navegación secundaria"><a href="index.html">Inicio</a><a href="propiedades.html">Propiedades</a><a href="nosotros.html">Nosotros</a><a href="servicios.html">Servicios</a><a href="contacto.html">Contacto</a></nav>
+        <p class="footer-location">Corrientes Capital,<br>Argentina.</p>
+      </div>
+      <p class="footer-disclaimer">Proyecto ficticio de demostración. Las propiedades y los datos comerciales no representan ofertas reales.</p>
+    </div>
   </footer>
 </body>
 </html>
