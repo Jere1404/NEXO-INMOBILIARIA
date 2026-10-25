@@ -73,6 +73,15 @@ jobs:
       - name: Test processor and authorization boundary
         run: npm test --prefix supabase/functions
 
+      - name: Verify Docker daemon and bundling guard
+        run: |
+          docker info --format '{{.ServerVersion}}'
+          node --test scripts/tests/image-function-bundle.test.mjs
+          python3 -B -m unittest discover -s scripts/tests -p 'test_deploy_image_function_docker.py'
+
+      - name: Build and measure actual bundle locally without deployment
+        run: python3 -B scripts/deploy-image-function-docker.py
+
       - name: Deploy only nexo-property-image and verify active status
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -82,7 +91,9 @@ jobs:
             echo '::error::Configure the SUPABASE_ACCESS_TOKEN Actions secret before running this workflow.'
             exit 1
           fi
-          supabase functions deploy nexo-property-image --project-ref ugrqstsuhamjjewusigh --use-api --output-format text
+          # Internally invokes CLI 2.122.0 with --use-docker. The loopback guard
+          # blocks source API fallback and validates the actual ESZIP/EZBR before forwarding.
+          python3 -B scripts/deploy-image-function-docker.py --deploy
           python3 - <<'PY'
           import json, os, urllib.request
           class NoRedirect(urllib.request.HTTPRedirectHandler):
