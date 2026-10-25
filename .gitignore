@@ -4,3 +4,9 @@ supabase/tests/node_modules/
 
 # npm application/build dependencies
 /node_modules/
+
+# Local Edge Function processor tests
+supabase/functions/node_modules/
+
+# Prepared processor deployment asset (reproducible from pinned package)
+supabase/functions/nexo-property-image/magick.wasm
