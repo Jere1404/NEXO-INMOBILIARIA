@@ -1,0 +1,7 @@
+{
+  "name": "nexo-image-processor-tests",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/*.test.mjs", "test:runtime": "node tests/runtime-smoke.mjs" },
+  "devDependencies": { "@imagemagick/magick-wasm": "0.0.45" }
+}

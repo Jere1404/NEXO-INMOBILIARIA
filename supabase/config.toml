@@ -1,0 +1,7 @@
+# Local configuration only. No automatic deployment or remote changes.
+[functions.nexo-property-image]
+# Handler verifies the user with auth.getUser() and checks admin_memberships
+# before any privileged call. Compatible with current Supabase JWT signing keys.
+verify_jwt = false
+entrypoint = "./functions/nexo-property-image/index.js"
+static_files = ["./functions/nexo-property-image/magick.wasm", "./functions/nexo-property-image/MAGICK-LICENSE", "./functions/nexo-property-image/MAGICK-NOTICE"]
