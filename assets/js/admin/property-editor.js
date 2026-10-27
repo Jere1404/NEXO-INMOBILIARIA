@@ -1,4 +1,5 @@
-import { getAdminClient } from './supabase-client.js';
+import { createImagePanel } from './image-panel.js?v=v5c2';
+import { getAdminClient, authConfig } from './supabase-client.js';
 import { createAdminAuth } from '../backend/auth.js';
 import { AdminAccessDenied, propertyStatuses } from '../backend/admin-properties.js';
 import { createPropertyManager, PropertyConflict } from '../backend/property-management.js?v=v5b3';
@@ -7,13 +8,13 @@ import { createLocationFields } from './location-fields.js';
 
 const $ = id => document.getElementById(id);
 const fields = ['public_code','title','description','property_type','operation','status','price','currency','zone_slug','city','area','bedrooms','bathrooms','approximate_location'];
-let client, auth, manager, locationFields, context, locationsBusy = false, dirty = false, saving = false, generation = 0, blocked = false;
+let client, auth, manager, locationFields, imagePanel, context, locationsBusy = false, imagesBusy = false, dirty = false, saving = false, generation = 0, blocked = false;
 let id = new URLSearchParams(location.search).get('id');
 const newCode = `nexo-${crypto.randomUUID()}`;
 function message(text) { $('editor-message').textContent = text; }
-function conceal() { $('property-form').hidden = true; $('admin-session').hidden = true; }
+function conceal() { $('property-form').hidden = true; $('admin-session').hidden = true; imagePanel?.hide(); }
 function denied(error) {
-  generation++; context = null; dirty = false; locationFields?.reset(); locationsBusy = false; conceal(); $('property-form').reset(); $('amenity-options').replaceChildren();
+  generation++; context = null; dirty = false; imagePanel?.clear(); locationFields?.reset(); locationsBusy = false; conceal(); $('property-form').reset(); $('amenity-options').replaceChildren();
   $('editor-title').textContent = 'Acceso no disponible';
   message(error instanceof AdminAccessDenied ? 'Iniciá sesión con una cuenta administrativa habilitada.' : error.message || 'No pudimos comprobar el acceso.');
   $('editor-login').hidden = false; $('editor-retry').hidden = false;
@@ -26,19 +27,20 @@ function input() {
   return result;
 }
 function refreshControls() {
-  $('editor-fields').disabled = saving || blocked || locationsBusy;
+  $('editor-fields').disabled = saving || blocked || locationsBusy || imagesBusy;
   $('save-property').disabled = !context || !locationFields?.ready();
   $('status').disabled = !context?.property;
   const land = $('property_type').value === 'terreno';
   $('bedrooms').disabled = land; $('bathrooms').disabled = land;
   $('save-property').textContent = saving ? 'Guardando…' : context?.property ? 'Guardar cambios' : 'Guardar borrador';
+  imagePanel?.sync();
 }
 function reveal(user) {
   $('admin-identity').textContent = user.email || 'Cuenta autorizada';
-  $('admin-session').hidden = false; $('property-form').hidden = false;
+  $('admin-session').hidden = false; $('property-form').hidden = false; imagePanel?.show();
 }
 async function open() {
-  if (saving) return;
+  if (saving || imagesBusy) return;
   if (dirty && !confirm('Hay cambios sin guardar. ¿Querés descartarlos y volver a cargar?')) return;
   const run = ++generation; conceal(); message('Cargando información…');
   try {
@@ -70,7 +72,7 @@ async function revalidate() {
   catch (error) { if (run === generation) denied(error); }
 }
 async function save(event) {
-  event.preventDefault(); if (saving || blocked || locationsBusy || !context || !locationFields.ready()) return;
+  event.preventDefault(); if (saving || imagesBusy || blocked || locationsBusy || !context || !locationFields.ready()) return;
   const data = input();
   const oldStatus = context.property?.status || 'draft';
   if (data.status !== oldStatus) {
@@ -85,6 +87,7 @@ async function save(event) {
     history.replaceState(null,'',`propiedad.html?id=${encodeURIComponent(id)}`);
     $('editor-title').textContent = 'Editar propiedad';
     message(`Propiedad guardada correctamente como ${propertyStatuses[saved.status].toLowerCase()}.`);
+    imagePanel?.show();
   } catch (error) {
     if (run !== generation) return;
     if (error instanceof AdminAccessDenied) denied(error);
@@ -96,7 +99,7 @@ async function save(event) {
   } finally { saving = false; refreshControls(); }
 }
 async function logout() {
-  if (saving || (dirty && !confirm('Hay cambios sin guardar. ¿Querés descartarlos y cerrar sesión?'))) return;
+  if (saving || ((dirty || imagePanel?.hasPending()) && !confirm('Hay cambios sin guardar. ¿Querés descartarlos y cerrar sesión?'))) return;
   denied(new AdminAccessDenied());
   try { await auth.signOut(); message('Sesión cerrada.'); }
   catch { message('No pudimos confirmar el cierre de sesión. Volvé a intentarlo.'); $('admin-session').hidden = false; $('admin-identity').textContent = 'Cierre no confirmado'; }
@@ -108,8 +111,9 @@ function init() {
     onChange:({zones,city})=>{if(context){context.zones=zones;$('city').value=city;}refreshControls();},
     onBusy:value=>{locationsBusy=value;refreshControls();},onDenied:denied,
   });
+  imagePanel = createImagePanel(client,{supabaseUrl:authConfig.supabaseUrl,getProperty:()=>context?.property,canUpload:()=>!!context&&!dirty&&!saving&&!locationsBusy&&!blocked,onBusy:value=>{imagesBusy=value;refreshControls();},onDenied:denied});
   $('property-form').addEventListener('submit',save);
-  $('property-form').addEventListener('input',()=>{dirty = true;});
+  $('property-form').addEventListener('input',()=>{dirty = true;refreshControls();});
   $('property_type').addEventListener('change',()=>{
     if ($('property_type').value === 'terreno' && ($('bedrooms').value !== '' || $('bathrooms').value !== '')) {
       if (confirm('Los terrenos no admiten habitaciones ni baños. ¿Querés vaciar esos campos?')) { $('bedrooms').value = ''; $('bathrooms').value = ''; }
@@ -118,10 +122,10 @@ function init() {
     refreshControls();
   });
   $('editor-retry').addEventListener('click',open); $('admin-logout').addEventListener('click',logout);
-  for (const link of document.querySelectorAll('a')) link.addEventListener('click',event=>{if(saving || (dirty && !confirm('Hay cambios sin guardar. ¿Querés salir sin guardarlos?'))) event.preventDefault();});
-  window.addEventListener('beforeunload',event=>{if(dirty || saving){event.preventDefault();event.returnValue = '';}});
+  for (const link of document.querySelectorAll('a')) link.addEventListener('click',event=>{if(saving || imagesBusy || ((dirty || imagePanel?.hasPending()) && !confirm('Hay cambios sin guardar. ¿Querés salir sin guardarlos?'))) event.preventDefault();});
+  window.addEventListener('beforeunload',event=>{if(dirty || saving || imagesBusy || imagePanel?.hasPending()){event.preventDefault();event.returnValue = '';}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)conceal();else revalidate();});
-  window.addEventListener('pagehide',conceal);
+  window.addEventListener('pagehide',()=>{conceal();imagePanel?.clear();});
   window.addEventListener('pageshow',event=>{if(event.persisted)revalidate();});
   client.auth.onAuthStateChange(event=>{
     if(event === 'SIGNED_OUT') denied(new AdminAccessDenied());

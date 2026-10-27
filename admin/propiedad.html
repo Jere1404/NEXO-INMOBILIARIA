@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' https://*.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' https://ugrqstsuhamjjewusigh.supabase.co; connect-src 'self' https://*.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'">
   <title>Editar propiedad | NEXO Inmobiliaria</title>
   <link rel="stylesheet" href="../assets/css/styles.css?v=v5b3">
   <link rel="stylesheet" href="../assets/css/admin-panel.css?v=v5b3">
-  <link rel="stylesheet" href="../assets/css/admin-editor.css?v=v5b3">
-  <script type="module" src="../assets/js/admin/property-editor.js?v=v5b3"></script>
+  <link rel="stylesheet" href="../assets/css/admin-editor.css?v=v5c2">
+  <script type="module" src="../assets/js/admin/property-editor.js?v=v5c2"></script>
 </head>
 <body class="property-editor-page">
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -59,11 +59,28 @@
           <div class="editor-grid"><div class="editor-wide"><label for="description">Descripción</label><textarea id="description" name="description" rows="6" required maxlength="20000"></textarea></div></div>
           <label class="checkbox-label"><input id="featured" name="featured" type="checkbox"> Destacada</label>
           <label class="checkbox-label"><input id="is_demo" name="is_demo" type="checkbox"> Propiedad ficticia de demostración</label>
-          <p class="section-help">No se cargan imágenes en esta etapa. Publicar habilita la lectura en la API de Supabase; el catálogo público mantiene su JSON actual.</p>
+          <p class="section-help">Las fotografías se gestionan después de guardar la propiedad. Publicar habilita la lectura en la API de Supabase; el catálogo público mantiene su JSON actual.</p>
         </fieldset>
         <div class="editor-actions"><button id="save-property" class="button" type="submit">Guardar borrador</button><a id="cancel-edit" href="index.html">Volver al listado</a></div>
       </fieldset>
     </form>
+    <section id="image-panel" class="editor-section" aria-labelledby="image-title" hidden>
+      <div class="list-heading"><h2 id="image-title">Fotografías</h2><button id="refresh-images" class="secondary-button" type="button">Actualizar fotografías</button></div>
+      <p id="image-save-help" class="section-help"></p>
+      <p class="section-help">Los originales y las versiones optimizadas se guardan en buckets privados. Esta carga no modifica todavía las imágenes del catálogo público.</p>
+      <form id="image-upload-form"><fieldset id="image-controls" disabled><legend class="sr-only">Agregar fotografías</legend>
+        <div class="editor-grid">
+          <div class="editor-wide"><label for="image-files">Seleccionar fotografías</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple></div>
+          <div><label for="image-source">Procedencia del lote</label><select id="image-source" required><option value="">Seleccioná una procedencia</option><option value="ai">Generadas con IA</option><option value="licensed">Licencia de uso disponible</option><option value="owner_authorized">Autorización del propietario</option></select></div>
+          <label class="checkbox-label"><input id="image-illustrative" type="checkbox" checked> Imágenes ilustrativas</label>
+        </div>
+        <p class="section-help">La descripción y la procedencia quedan fijadas al iniciar la carga para poder reintentar. Seleccionar otro lote no elimina fotografías ya guardadas.</p>
+        <ol id="image-queue" class="image-queue"></ol>
+        <button id="upload-images" class="button" type="submit">Subir fotografías</button>
+      </fieldset></form>
+      <p id="image-status" role="status" aria-live="polite"></p><p id="image-count" class="section-help"></p>
+      <ul id="image-gallery" class="admin-image-grid" aria-label="Fotografías de esta propiedad"></ul>
+    </section>
   </main>
   <footer class="container panel-footer">NEXO Inmobiliaria · Administración</footer>
 </body>
