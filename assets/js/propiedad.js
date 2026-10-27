@@ -1,5 +1,7 @@
-import { loadProperties, createPropertyMedia, getPropertyImage, renderPropertyCards, propertyTypes, operations } from './property-cards.js';
-import { readPropertyId, findProperty, getSimilarProperties, getGalleryImages, buildInquiryMessage, getWhatsAppUrl, amenityLabels } from './property-details.js';
+import {publicData} from './data/public-provider.js';
+import {imageCaption} from './data/public-images.js';
+import { createPropertyMedia, getPropertyImage, renderPropertyCards, propertyTypes, operations } from './property-cards.js';
+import { readPropertyId, getGalleryImages, buildInquiryMessage, getWhatsAppUrl, amenityLabels } from './property-details.js';
 import { whatsappNumber } from './site-config.js';
 
 const $ = id => document.getElementById(id);
@@ -16,7 +18,7 @@ function renderGallery(property) {
   const images = getGalleryImages(property, getPropertyImage);
   function selectImage(index, announce = false) {
     $('gallery-image').replaceChildren(createPropertyMedia(images[index] ?? null, { priority: true, sizes: '(min-width: 1280px) 776px, (min-width: 1024px) calc(100vw - 464px), (min-width: 768px) calc(100vw - 80px), calc(100vw - 40px)' }));
-    $('gallery-caption').textContent = images.length ? `Imagen ${index + 1} de ${images.length} · Ilustración generada con IA` : 'Imagen de referencia no disponible';
+    $('gallery-caption').textContent = images.length ? `Imagen ${index + 1} de ${images.length} · ${imageCaption(images[index])}` : 'Imagen de referencia no disponible';
     for (const [i, button] of [...$('gallery-controls').children].entries()) button.setAttribute('aria-pressed', String(i === index));
     if (announce) $('gallery-status').textContent = `Imagen ${index + 1} de ${images.length}`;
   }
@@ -32,7 +34,7 @@ function renderGallery(property) {
   }
   selectImage(0);
 }
-function renderDetail(property, properties) {
+function renderDetail(property, similar) {
   const number = new Intl.NumberFormat('es-AR');
   $('detail-title').textContent = property.titulo;
   document.title = `${property.titulo} | NEXO Inmobiliaria`;
@@ -62,7 +64,6 @@ function renderDetail(property, properties) {
     $('whatsapp-disabled').hidden = true;
     $('whatsapp-help').textContent = 'Abrí WhatsApp y revisá el mensaje antes de enviarlo.';
   }
-  const similar = getSimilarProperties(properties, property);
   if (similar.length) {
     renderPropertyCards($('similar-properties'), similar);
     $('similar-section').hidden = false;
@@ -77,10 +78,14 @@ async function init() {
     return;
   }
   try {
-    const properties = await loadProperties();
-    const property = findProperty(properties, id);
+    const property = await publicData.detail(id);
     if (!property) { showError('Propiedad no encontrada', 'No encontramos una propiedad con ese identificador. Podés seguir explorando el catálogo.'); return; }
-    renderDetail(property, properties);
+    renderDetail(property, []);
+    // Render the valid detail before waiting for recommendations.
+    try{
+      const similar=await publicData.similar(id);
+      if(similar.length){renderPropertyCards($('similar-properties'),similar);$('similar-section').hidden=false;}
+    }catch{ /* Recommendations must not hide a valid detail. */ }
   } catch {
     showError('No pudimos cargar la propiedad', 'Ocurrió un problema al cargar los datos. Intentá recargar la página o volvé al catálogo.');
   }

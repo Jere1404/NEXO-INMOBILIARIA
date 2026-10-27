@@ -119,3 +119,7 @@ El backend de imágenes está desplegado y el responsable confirmó los rechazos
 En esta copia de trabajo, el editor permite seleccionar y validar fotografías, subir originales privados sin sobrescritura, solicitar el procesamiento y mostrar vistas previas firmadas. Conserva la sesión del panel, los datos de reserva en los reintentos y los avisos de error. El catálogo público sigue usando su JSON y sus imágenes actuales. La interfaz todavía requiere revisión y publicación separadas; la primera carga real y el consumo del procesador en Supabase Free siguen pendientes.
 
 Ver [alcance, pruebas y publicación del frontend V5C.2](docs/ADMIN-IMAGENES-V5C2.md). Build: `npm run build:images`; pruebas: `npm test`.
+
+### Preparación V5D.3
+
+Inicio, catálogo y fichas usan un proveedor configurable; **JSON continúa activo**. Está preparada la integración paginada con `nexo-public-catalog`, sin transmitir parámetros de seguimiento ni sesiones administrativas. La activación y reversión requieren un cambio explícito aprobado de configuración. Alcance, pruebas y pendientes: [Proveedor público V5D.3](docs/PROVEEDOR-PUBLICO-V5D3.md).
