@@ -23,3 +23,20 @@
 .location-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 #location-message { margin: 0; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; color: #526174; }
 @media (min-width: 48rem) { .editor-section { padding: 28px; } .editor-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .editor-wide { grid-column: 1 / -1; } #amenity-options { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+
+#image-panel { max-width: 1000px; margin-top: 30px; }
+#image-panel h2 { font-size: 22px; }
+#image-controls { padding: 0; margin: 0; border: 0; min-width: 0; }
+#image-status { line-height: 1.8; font-size: 13px; overflow-wrap: anywhere; }
+.image-queue { padding-left: 20px; }
+.image-queue li { margin-block: 20px; overflow-wrap: anywhere; }
+.image-queue label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+.image-queue input { width: 100%; min-height: 46px; padding: 12px; font: inherit; font-size: 16px; border: 1px solid #aabace; border-radius: 6px; }
+.image-queue p { font-size: 12px; line-height: 1.8; }
+.admin-image-grid { display: grid; grid-template-columns: minmax(0,1fr); list-style: none; padding: 0; gap: 20px; }
+.admin-image-grid li { min-width: 0; border: 1px solid #dce2e9; border-radius: 8px; padding: 12px; overflow-wrap: anywhere; }
+.admin-image-grid img,.admin-photo-placeholder { display: block; width: 100%; aspect-ratio: 4/3; height: auto; object-fit: contain; background: #f3f5f7; border-radius: 4px; }
+.admin-photo-placeholder { display: grid; place-items: center; padding: 16px; font-size: 12px; }
+.admin-image-grid p { font-size: 12px; line-height: 1.7; }
+@media (min-width: 40rem) { .admin-image-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (min-width: 64rem) { .admin-image-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }

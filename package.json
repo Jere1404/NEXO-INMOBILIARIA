@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build:auth": "node scripts/build-auth-sdk.mjs",
+    "build:images": "node scripts/build-image-validator.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": { "@supabase/supabase-js": "2.118.0" },

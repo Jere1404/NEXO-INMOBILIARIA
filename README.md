@@ -111,3 +111,11 @@ El panel permite crear borradores, editar datos y comodidades, publicar, despubl
 ## V5B.3 — formulario y ubicaciones, pendiente de revisión
 
 El editor organiza la información en secciones con estilos propios versionados y permite elegir provincia/localidad/zona, además de guardar nuevas localidades y zonas reutilizables mediante Supabase. La migración independiente `202610240003_v5b3_locations.sql` ya fue aplicada y verificada manualmente en Supabase por el responsable; no debe repetirse en ese proyecto y conserva las propiedades existentes. No cambia la autenticación ni el catálogo público. Ver [diagnóstico, migración y pruebas de V5B.3](docs/ADMIN-UBICACIONES-V5B3.md).
+
+## V5C.2 — interfaz administrativa de fotografías pendiente de publicación
+
+El backend de imágenes está desplegado y el responsable confirmó los rechazos de acceso anónimo y la autorización administrativa. Las migraciones y los buckets privados ya fueron instalados manualmente; no deben repetirse para publicar la interfaz.
+
+En esta copia de trabajo, el editor permite seleccionar y validar fotografías, subir originales privados sin sobrescritura, solicitar el procesamiento y mostrar vistas previas firmadas. Conserva la sesión del panel, los datos de reserva en los reintentos y los avisos de error. El catálogo público sigue usando su JSON y sus imágenes actuales. La interfaz todavía requiere revisión y publicación separadas; la primera carga real y el consumo del procesador en Supabase Free siguen pendientes.
+
+Ver [alcance, pruebas y publicación del frontend V5C.2](docs/ADMIN-IMAGENES-V5C2.md). Build: `npm run build:images`; pruebas: `npm test`.
