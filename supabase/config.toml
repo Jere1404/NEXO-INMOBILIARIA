@@ -5,3 +5,8 @@
 verify_jwt = false
 entrypoint = "./functions/nexo-property-image/index.js"
 static_files = ["./functions/nexo-property-image/magick.wasm", "./functions/nexo-property-image/MAGICK-LICENSE", "./functions/nexo-property-image/MAGICK-NOTICE"]
+
+[functions.nexo-public-catalog]
+# Public read-only API. Queries always use an isolated anonymous client and RLS.
+verify_jwt = false
+entrypoint = "./functions/nexo-public-catalog/index.js"
