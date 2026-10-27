@@ -1,4 +1,5 @@
-import { loadProperties, renderPropertyCards } from './property-cards.js';
+import {publicData} from './data/public-provider.js';
+import { renderPropertyCards } from './property-cards.js';
 
 const featuredList = document.querySelector('#featured-properties');
 const featuredStatus = document.querySelector('#featured-status');
@@ -7,9 +8,8 @@ async function loadFeaturedProperties() {
   featuredStatus.hidden = false;
   featuredStatus.textContent = 'Cargando propiedades de demostración…';
   try {
-    const properties = await loadProperties();
-    const featured = properties.filter((property) => property.destacada && property.ficticia).slice(0, 6);
-    if (!featured.length) throw new Error('No hay propiedades destacadas.');
+    const featured = await publicData.featured();
+    if (!featured.length) {featuredStatus.textContent='Todavía no hay propiedades destacadas disponibles.';return;}
     renderPropertyCards(featuredList, featured);
     featuredStatus.textContent = '';
     featuredStatus.hidden = true;

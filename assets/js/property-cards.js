@@ -1,3 +1,4 @@
+import {isSignedPropertyImage,imageCaption} from './data/public-images.js';
 export const propertyTypes = { casa: 'Casa', departamento: 'Departamento', terreno: 'Terreno' };
 export const operations = { venta: 'Venta', alquiler: 'Alquiler' };
 export const zones = {
@@ -44,10 +45,11 @@ export function getPropertyImage(image) {
   const localPath = (path, extension) => typeof path === 'string'
     && new RegExp(`^assets/images/propiedades/[a-zA-Z0-9/_-]+\\.${extension}$`).test(path);
   const positive = value => Number.isInteger(value) && value > 0;
-  if (!image || !localPath(image.src, 'jpe?g') || !positive(image.width) || !positive(image.height)
+  const allowed=(path,extension)=>localPath(path,extension)||isSignedPropertyImage(path,extension,{expiresAt:image?.expiresAt});
+  if (!image || !allowed(image.src, 'jpe?g') || !positive(image.width) || !positive(image.height)
     || typeof image.alt !== 'string' || !image.alt.trim()) return null;
   const variants = (items, extension) => (Array.isArray(items) ? items : [])
-    .filter(item => item && localPath(item.src, extension) && positive(item.width))
+    .filter(item => item && allowed(item.src, extension) && positive(item.width))
     .sort((a, b) => a.width - b.width)
     .filter((item, index, items) => index === 0 || item.width !== items[index - 1].width);
   return { ...image, webp: variants(image.webp, 'webp'), jpeg: variants(image.jpeg, 'jpe?g') };
@@ -55,7 +57,8 @@ export function getPropertyImage(image) {
 
 export function createPropertyMedia(image, { priority = false, sizes = '100vw' } = {}) {
   const media = element('div', 'property-media');
-  const fallback = element('div', 'property-image-placeholder', 'Fotografía no disponible');
+  const expired=image?.expiresAt&&Date.parse(image.expiresAt)<=Date.now();
+  const fallback = element('div', 'property-image-placeholder', expired?'La fotografía temporal venció. Recargá la página para renovarla.':'Fotografía no disponible');
   media.append(fallback);
   const photo = getPropertyImage(image);
   if (!photo) return media;
@@ -78,6 +81,7 @@ export function createPropertyMedia(image, { priority = false, sizes = '100vw' }
   if (photo.jpeg.length) img.srcset = photo.jpeg.map(item => `${item.src} ${item.width}w`).join(', ');
   img.addEventListener('error', () => {
     picture.remove();
+    if(image?.expiresAt&&Date.parse(image.expiresAt)<=Date.now())fallback.textContent='La fotografía temporal venció. Recargá la página para renovarla.';
     fallback.hidden = false;
   }, { once: true });
   img.addEventListener('load', () => { fallback.hidden = true; }, { once: true });
@@ -114,7 +118,7 @@ export function renderPropertyCards(list, properties, { showPlaceholder = true, 
     if (property.habitaciones !== null) values.push(`${property.habitaciones} ${property.habitaciones === 1 ? 'habitación' : 'habitaciones'}`);
     if (property.banos !== null) values.push(`${property.banos} ${property.banos === 1 ? 'baño' : 'baños'}`);
     for (const value of values) features.append(element('li', '', value));
-    card.append(features, element('p', 'property-disclaimer', 'Propiedad ficticia · Imagen ilustrativa generada con IA'));
+    card.append(features, element('p', 'property-disclaimer', `${property.ficticia?'Propiedad ficticia · ':''}${property.imagen?.sourceKind?imageCaption(property.imagen):property.imagen?.src?.startsWith('assets/images/propiedades/')?'Imagen ilustrativa generada con IA':'Imagen de referencia'}`));
     const link = element('a', 'property-details-link', 'Ver propiedad');
     link.href = `propiedad.html?id=${encodeURIComponent(property.id)}`;
     link.setAttribute('aria-label', `Ver propiedad: ${property.titulo}`);
