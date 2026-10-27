@@ -1,0 +1,103 @@
+name: Deploy nexo-public-catalog
+
+# Manual only. Selecting another branch skips deployment.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexo-public-catalog-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'Jere1404/NEXO-INMOBILIARIA' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the manually selected main revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+
+      - name: Set up pinned Supabase CLI
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
+        with:
+          version: 2.122.0
+
+      - name: Verify public catalog package and configuration
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, tomllib
+          root = pathlib.Path.cwd().resolve()
+          config = tomllib.loads((root / 'supabase/config.toml').read_text())['functions']['nexo-public-catalog']
+          assert config['verify_jwt'] is False, 'Public catalog JWT configuration changed'
+          assert config['entrypoint'] == './functions/nexo-public-catalog/index.js'
+          assert not config.get('static_files'), 'Public catalog must not include WASM/static payloads'
+          files = [root / 'supabase' / config['entrypoint']]
+          files += [root / 'supabase/functions/_shared' / name for name in [
+              'public-catalog-contract.mjs', 'public-catalog-handler.mjs', 'public-catalog-repository.mjs']]
+          function_dir = root / 'supabase/functions/nexo-public-catalog'
+          files += [function_dir / 'deno.json', function_dir / 'deno.lock']
+          for file in files:
+              assert file.is_file() and file.resolve().is_relative_to(root), 'Missing or external package file'
+          assert json.loads((function_dir / 'deno.json').read_text())['lock'] == './deno.lock'
+          lock = json.loads((function_dir / 'deno.lock').read_text())
+          assert lock['version'] == '4', 'Use the reviewed Deno-compatible lock'
+          assert lock['specifiers']['npm:@supabase/supabase-js@2.118.0'] == '2.118.0'
+          print('Verified public catalog package and verify_jwt=false; no deployment performed.')
+          PY
+          test "$(supabase --version)" = '2.122.0'
+
+      - name: Install locked application dependencies and run tests
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+          npm ci --prefix supabase/tests --ignore-scripts --no-audit --no-fund
+          npm test --prefix supabase/tests
+
+      - name: Validate pinned Deno runtime and test catalog entrypoint offline
+        run: |
+          npx --yes deno@2.1.4 cache --frozen --config supabase/functions/nexo-public-catalog/deno.json supabase/functions/nexo-public-catalog/index.js
+          npx --yes deno@2.1.4 check --frozen --config supabase/functions/nexo-public-catalog/deno.json supabase/functions/nexo-public-catalog/index.js
+          npx --yes deno@2.1.4 test --cached-only --frozen --allow-env --config supabase/functions/nexo-public-catalog/deno.json tests/deno/public-catalog.test.mjs
+
+      - name: Deploy only nexo-public-catalog and verify active status
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
+            echo '::error::SUPABASE_ACCESS_TOKEN Actions secret is missing.'
+            exit 1
+          fi
+          supabase functions deploy nexo-public-catalog --project-ref ugrqstsuhamjjewusigh --use-api
+          python3 - <<'PY'
+          import json, os, urllib.request
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, *args, **kwargs):
+                  return None
+          request = urllib.request.Request(
+              'https://api.supabase.com/v1/projects/ugrqstsuhamjjewusigh/functions',
+              headers={'Authorization': 'Bearer ' + os.environ['SUPABASE_ACCESS_TOKEN'], 'Accept': 'application/json'},
+              method='GET',
+          )
+          with urllib.request.build_opener(NoRedirect).open(request, timeout=30) as response:
+              functions = json.load(response)
+          function = next((item for item in functions if item.get('slug') == 'nexo-public-catalog'), None)
+          assert function is not None, 'Target function was not found after deployment'
+          assert function.get('status') == 'ACTIVE', 'Target function is not ACTIVE'
+          assert function.get('verify_jwt') is False, 'Remote JWT configuration differs from reviewed config'
+          print('Verified nexo-public-catalog: ACTIVE; verify_jwt=false; version=' + str(function.get('version')))
+          PY
