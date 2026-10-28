@@ -3,8 +3,8 @@ import {createImageHandler} from '../_shared/handler.mjs';import {sha256} from '
 const jpeg=new Uint8Array(await readFile(new URL('../../../assets/images/propiedades/nexo-001/principal-480.jpg',import.meta.url)));
 const webp=new Uint8Array(await readFile(new URL('../../../assets/images/propiedades/nexo-001/principal-480.webp',import.meta.url)));
 const hash=await sha256(jpeg),actor='11111111-1111-4111-8111-111111111111',property='22222222-2222-4222-8222-222222222222',image='33333333-3333-4333-8333-333333333333',token='44444444-4444-4444-8444-444444444444',origin='https://jere1404.github.io';
-function fixture({validUser=true,enabled=true,uploadFailure=false,lostFinalize=false,badOriginal=false,unknownState=false,decodeGate=null,lateFinalize=false,failUncertain=false,uploadFailureAt=null}={}){
- const calls=[];let factories=0,decoded=0,uploads=0;const row={id:image,property_id:property,storage_kind:'managed',original_extension:'jpg',original_bytes:jpeg.length,original_sha256:hash,processing_status:'pending',processing_token:token,storage_prefix:`properties/${property}/${image}/`,original_object_key:`properties/${property}/${image}/original.jpg`,processing_attempts:1};
+function fixture({validUser=true,enabled=true,uploadFailure=false,lostFinalize=false,badOriginal=false,unknownState=false,decodeGate=null,lateFinalize=false,failUncertain=false,uploadFailureAt=null,inactiveCandidate=false}={}){
+ const calls=[];let factories=0,decoded=0,uploads=0;const row={id:image,property_id:property,storage_kind:'managed',image_active:!inactiveCandidate,original_extension:'jpg',original_bytes:jpeg.length,original_sha256:hash,processing_status:'pending',processing_token:token,storage_prefix:`properties/${property}/${image}/`,original_object_key:`properties/${property}/${image}/original.jpg`,processing_attempts:1};
  const publicClient=()=>({auth:{getUser:async()=>({data:{user:validUser?{id:actor}:null}})},from:()=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:{enabled,role:'admin'}})})})})});
  const server={rpc(name,args){
   const run=async()=>{
@@ -67,4 +67,21 @@ test('an uncertain failure RPC never authorizes deletion using an earlier pendin
 });
 test('failure on the last variant prevents finalization despite earlier successful uploads',async()=>{
  const f=fixture({uploadFailureAt:2});const response=await f.handler(f.request(processBody));assert.equal(response.status,503);assert.equal(f.calls.filter(c=>c.upload).length,2);assert(!f.calls.some(c=>c.name==='nexo_service_finalize_image'));
+});
+
+test('replacement preparation passes only verified actor and validated source to its RPC',async()=>{
+ const f=fixture();const r=await f.handler(f.request({action:'prepareReplacement',propertyId:property,sourceImageId:token,requestId:image,extension:'jpg',bytes:jpeg.length,sha256:hash,alt:' Candidata ',sourceKind:'ai',illustrative:true}));
+ assert.equal(r.status,200);assert.equal(f.calls[0].name,'nexo_service_prepare_replacement');assert.equal(f.calls[0].args.p_source,token);assert.equal(f.calls[0].args.p_source_kind,'ai');assert.equal(f.calls[0].args.p_actor,actor);assert.equal(f.stats().decoded,0);
+ const bad=await f.handler(f.request({action:'prepareReplacement',propertyId:property,sourceImageId:'bad',requestId:image,extension:'jpg',bytes:jpeg.length,sha256:hash,alt:'Candidata',sourceKind:'ai',illustrative:true}));assert.equal(bad.status,400);
+});
+test('replacement confirmation/reversion reject forged fields and revoked administrators',async()=>{
+ for(const action of ['confirmReplacement','revertReplacement']){
+  const f=fixture();const r=await f.handler(f.request({action,propertyId:property,requestId:image}));assert.equal(r.status,200);assert.equal(f.calls[0].name,action==='confirmReplacement'?'nexo_service_confirm_replacement':'nexo_service_revert_replacement');assert.equal(f.calls[0].args.p_actor,actor);assert.equal(f.stats().decoded,0);
+  assert.equal((await f.handler(f.request({action,propertyId:property,requestId:image,p_actor:token}))).status,400);
+  const denied=fixture({enabled:false});assert.equal((await denied.handler(denied.request({action,propertyId:property,requestId:image}))).status,403);assert.equal(denied.stats().factories,0);
+ }
+});
+
+test('failed replacement processing retains staged objects and never performs physical cleanup',async()=>{
+ const f=fixture({inactiveCandidate:true,uploadFailure:true});const response=await f.handler(f.request(processBody));assert.equal(response.status,503);assert(f.calls.some(c=>c.name==='nexo_service_fail_image'));assert(!f.calls.some(c=>c.removed||c.name==='nexo_service_cleanup_attempt'));
 });

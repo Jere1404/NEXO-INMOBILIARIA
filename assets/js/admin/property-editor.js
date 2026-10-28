@@ -1,4 +1,4 @@
-import { createImagePanel } from './image-panel.js?v=v5c2';
+import { createImagePanel } from './image-panel.js?v=legacy-replacement-1';
 import { getAdminClient, authConfig } from './supabase-client.js';
 import { createAdminAuth } from '../backend/auth.js';
 import { AdminAccessDenied, propertyStatuses } from '../backend/admin-properties.js';

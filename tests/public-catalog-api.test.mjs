@@ -6,14 +6,15 @@ import {createPublicCatalogHandler} from '../supabase/functions/_shared/public-c
 const origin='https://jere1404.github.io',project='https://fixture.supabase.co';
 const uuid=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const makeProperty=(n,overrides={})=>({id:uuid(n),public_code:`nexo-${String(n).padStart(3,'0')}`,status:'published',title:'Casa '+n,description:'Descripción existente',property_type:'casa',operation:'venta',price:100+n,currency:'USD',zone_slug:'centro',city:'Corrientes Capital',area:90+n,area_unit:'m²',bedrooms:2,bathrooms:1,featured:true,is_demo:true,created_at:`2026-10-${String(n).padStart(2,'0')}`,zone:{name:'Centro',locality:{id:uuid(100),province_code:'18'}},property_amenities:[{amenity_slug:'patio'},{amenity_slug:'cochera'}],approximate_location:'Zona Centro',...overrides});
-const makeImage=(n,overrides={})=>{const prefix=`properties/${uuid(n)}/${uuid(1000+n)}/`,token=uuid(2000+n);return {id:uuid(1000+n),property_id:uuid(n),position:0,is_primary:true,storage_kind:'managed',processing_status:'ready',cleanup_requested_at:null,width:960,height:720,alt:'Frente',source_kind:'ai',illustrative:true,storage_prefix:prefix,processing_token:token,processed_at:'2026-10-27T00:00:00Z',original_sha256:'a'.repeat(64),verified_sha256:'a'.repeat(64),jpeg_path:`${prefix}v-${token}-960.jpg`,webp_variants:[480,960].map(width=>({src:`${prefix}v-${token}-${width}.webp`,width})),jpeg_variants:[480,960].map(width=>({src:`${prefix}v-${token}-${width}.jpg`,width})),...overrides};};
-function fixture({properties=[makeProperty(1)],photos=[makeImage(1)],partial=false,storageFailure=false,dbFailure=false,revokeAt=0,delay=false,rangeError=false,countFailure=false}={}){
+const makeImage=(n,overrides={})=>{const prefix=`properties/${uuid(n)}/${uuid(1000+n)}/`,token=uuid(2000+n);return {id:uuid(1000+n),property_id:uuid(n),position:0,is_primary:true,image_active:true,storage_kind:'managed',processing_status:'ready',cleanup_requested_at:null,width:960,height:720,alt:'Frente',source_kind:'ai',illustrative:true,storage_prefix:prefix,processing_token:token,processed_at:'2026-10-27T00:00:00Z',original_sha256:'a'.repeat(64),verified_sha256:'a'.repeat(64),jpeg_path:`${prefix}v-${token}-960.jpg`,webp_variants:[480,960].map(width=>({src:`${prefix}v-${token}-${width}.webp`,width})),jpeg_variants:[480,960].map(width=>({src:`${prefix}v-${token}-${width}.jpg`,width})),...overrides};};
+function fixture({properties=[makeProperty(1)],photos=[makeImage(1)],partial=false,storageFailure=false,dbFailure=false,revokeAt=0,delay=false,rangeError=false,countFailure=false,hideDuringSigning=false}={}){
  const calls=[];let rechecks=0,factories=0;
  const fetch=async(input,init={})=>{
   const url=new URL(input);const headers=new Headers(init.headers);const body=init.body?JSON.parse(init.body):null;const method=init.method||'GET';calls.push({url,headers,body,method});
   if(delay)return new Promise(()=>{});
   const json=(data,status=200,total)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json',...(total===undefined?{}:{'Content-Range':`0-${Math.max(0,data.length-1)}/${total}`})}});
   if(url.pathname.startsWith('/storage/')){
+   if(hideDuringSigning)photos.forEach(photo=>{photo.image_active=false;});
    assert.equal(headers.get('apikey'),'server-test');assert.equal(method,'POST');assert.equal(url.pathname,'/storage/v1/object/sign/nexo-property-images');assert.equal(body.expiresIn,300);
    if(storageFailure)return json({message:'PRIVATE ERROR'},500);
    const paths=partial?body.paths.slice(1):body.paths;
@@ -119,4 +120,15 @@ test('real PostgREST 416 pages recover filtered total through bounded HEAD, not 
  }
  const empty=fixture({properties:[],rangeError:true});assert.equal((await run(empty,'list?page=2')).body.pagination.total,0);
  const broken=fixture({rangeError:true,countFailure:true});assert.equal((await run(broken,'list?page=9')).status,503);
+});
+
+test('inactive replacement candidates and retired originals are never signed or returned',async()=>{
+ const hidden=makeImage(1,{image_active:false});const f=fixture({photos:[hidden]});const r=await run(f,'detail?id=nexo-001');
+ assert.equal(r.status,200);assert.equal(r.body.data.imagen,null);assert.deepEqual(r.body.data.fotografias,[]);
+ assert(!f.calls.some(c=>c.url.pathname.startsWith('/storage/')));
+ assert(f.calls.some(c=>c.url.pathname.endsWith('/property_images')&&c.url.searchParams.get('image_active')==='eq.true'));
+});
+
+test('replacement activity is rechecked after signing and stale delivery fails closed',async()=>{
+ const f=fixture({hideDuringSigning:true});const r=await run(f);assert.equal(r.status,503);assert(!JSON.stringify(r.body).includes('signedURL'));
 });

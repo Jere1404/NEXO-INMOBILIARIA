@@ -66,3 +66,10 @@ test('storage permission failures and safe backend error codes have actionable m
  assert(!uploadErrorMessage('<script>secret</script>').includes('script'));
  assert.equal(uploadErrorMessage('constructor'),uploadErrorMessage('unknown'));assert.equal(uploadErrorMessage('toString'),uploadErrorMessage('unknown'));
 });
+
+test('replacement uploads bind source and reuse the request identity on retries',async()=>{
+ const {client,calls}=fixture();const file=item();file.sourceImageId='33333333-3333-4333-8333-333333333333';
+ await createImageUploads(client).upload(property,file,{sourceKind:'ai',illustrative:true});
+ assert.equal(calls[0].body.action,'prepareReplacement');assert.equal(calls[0].body.sourceImageId,file.sourceImageId);assert.equal(calls[0].body.requestId,id);
+ await createImageUploads(client).upload(property,file,{sourceKind:'ai',illustrative:true});assert.equal(calls[3].body.requestId,id);
+});

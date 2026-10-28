@@ -2,7 +2,7 @@ import {projectPublishedProperty,authorizePublicImage,publicImageDto,SIGNED_IMAG
 // No wildcard selects. Image metadata uses a separate, narrowly scoped client.
 const fields='id,public_code,status,title,property_type,operation,price,currency,zone_slug,city,area,area_unit,bedrooms,bathrooms,featured,is_demo,zone:zones!inner(name,locality:localities!inner(id,province_code)),property_amenities(amenity_slug)';
 const detailFields=fields+',description,approximate_location';
-const imageFields='id,property_id,position,is_primary,storage_kind,processing_status,cleanup_requested_at,width,height,alt,source_kind,illustrative,storage_prefix,processing_token,processed_at,original_sha256,verified_sha256,jpeg_path,webp_variants,jpeg_variants';
+const imageFields='id,property_id,image_active,position,is_primary,storage_kind,processing_status,cleanup_requested_at,width,height,alt,source_kind,illustrative,storage_prefix,processing_token,processed_at,original_sha256,verified_sha256,jpeg_path,webp_variants,jpeg_variants';
 export class CatalogUnavailable extends Error {}
 export class CatalogNotFound extends Error {}
 const fail=()=>{throw new CatalogUnavailable();};
@@ -48,12 +48,12 @@ export function createPublicCatalogRepository({anonymous,images,projectUrl,signa
   // Recheck using anonymous RLS before reading privileged metadata and after signing.
   await stillPublished(ids);
   const max=ids.length*20;
-  const r=await rows(bounded(images.from('property_images').select(imageFields).in('property_id',ids).eq('processing_status','ready').is('cleanup_requested_at',null).order('position').order('id').limit(max+1)),max);
+  const r=await rows(bounded(images.from('property_images').select(imageFields).in('property_id',ids).eq('image_active',true).eq('processing_status','ready').is('cleanup_requested_at',null).order('position').order('id').limit(max+1)),max);
   if(r.data.some(v=>!ids.includes(v.property_id)))fail();
   const plans=input.map(property=>{
-   const candidates=r.data.filter(v=>v.property_id===property.id);if(candidates.length>20)fail();
+   const candidates=r.data.filter(v=>v.property_id===property.id&&v.image_active!==false);if(candidates.length>20)fail();
    const sorted=[...candidates].sort((a,b)=>Number(b.is_primary)-Number(a.is_primary)||a.position-b.position||a.id.localeCompare(b.id));
-   const authorized=sorted.map(i=>authorizePublicImage(property,i)).filter(Boolean);
+   const authorized=sorted.map(i=>{const plan=authorizePublicImage(property,i);return plan?{...plan,imageId:i.id}:null;}).filter(Boolean);
    return detail?authorized:authorized.slice(0,1);
   });
   const keys=[...new Set(plans.flat().filter(p=>p.delivery==='signed').flatMap(p=>p.variants.map(v=>v.key)))];
@@ -64,6 +64,13 @@ export function createPublicCatalogRepository({anonymous,images,projectUrl,signa
    try{signed=await images.storage.from('nexo-property-images').createSignedUrls(batch,SIGNED_IMAGE_TTL_SECONDS);}catch{continue;}
    if(signed.error||!Array.isArray(signed.data))continue;
    for(const item of signed.data)if(batch.includes(item.path)&&!item.error&&typeof item.signedUrl==='string')urls[item.path]=item.signedUrl;
+  }
+  // Fail closed if a replacement was confirmed/reverted while URLs were signed.
+  const selectedIds=[...new Set(plans.flat().map(plan=>plan.imageId))];
+  for(let i=0;i<selectedIds.length;i+=100){
+   const batch=selectedIds.slice(i,i+100);
+   const check=await rows(bounded(images.from('property_images').select('id').in('id',batch).eq('image_active',true).eq('processing_status','ready').is('cleanup_requested_at',null).limit(batch.length)),batch.length);
+   const visible=new Set(check.data.map(row=>row.id));if(batch.some(id=>!visible.has(id)))fail();
   }
   await stillPublished(ids);
   return data.map((item,i)=>{
