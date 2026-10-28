@@ -19,7 +19,9 @@ const server=http.createServer((req,res)=>{
  let browser;try{
  browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
  const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage();
- const errors=[],unexpected=[],calls=[];let mode='populated';
+ const errors=[],unexpected=[],calls=[];let mode='populated',imageMode='normal',slowGate,releaseSlow;
+ await context.addCookies([{name:'nexo_admin_fixture',value:'local_fake_value',domain:'ugrqstsuhamjjewusigh.supabase.co',path:'/'}]);
+ await context.addInitScript(()=>{sessionStorage.setItem('nexo-admin-fixture','local_fake_session');});
  page.on('pageerror',e=>errors.push(e.message));
  const id='11111111-1111-4111-8111-111111111111';
  const image={src:`${project}/storage/v1/object/sign/nexo-property-images/properties/${id}/${id}/v-${id}-960.jpg?token=fake.payload.signature`,width:960,height:720,alt:'Frente de referencia',webp:[],jpeg:[],expiresAt:new Date(Date.now()+240000).toISOString(),sourceKind:'owner_authorized',illustrative:true};
@@ -34,11 +36,12 @@ const server=http.createServer((req,res)=>{
    if(u.pathname.endsWith('/data/propiedades.json')){unexpected.push('JSON fallback');return route.abort();}
    return route.continue();
   }
-  if(u.origin===project&&u.pathname.startsWith('/storage/v1/object/sign/nexo-property-images/')){const webp=u.pathname.endsWith('.webp');return route.fulfill({contentType:webp?'image/webp':'image/jpeg',body:fs.readFileSync(path.join(root,'assets/images/propiedades/nexo-001/principal-480.'+(webp?'webp':'jpg')))});}
+  if(u.origin===project&&u.pathname.startsWith('/storage/v1/object/sign/nexo-property-images/')){if(imageMode==='broken')return route.fulfill({status:403,body:'Expired fixture'});const webp=u.pathname.endsWith('.webp');return route.fulfill({contentType:webp?'image/webp':'image/jpeg',body:fs.readFileSync(path.join(root,'assets/images/propiedades/nexo-001/principal-480.'+(webp?'webp':'jpg')))});}
   if(u.origin!==project||!u.pathname.startsWith('/functions/v1/nexo-public-catalog/')){unexpected.push(u.origin+u.pathname);return route.abort();}
+  const headersReceived=route.request().headers();assert(!headersReceived.authorization&&!headersReceived.cookie&&!headersReceived.apikey);assert(!headersReceived.referer);
   calls.push({action:u.pathname.split('/').at(-1),params:u.searchParams});assert(!u.searchParams.has('utm_source'));
   const action=calls.at(-1).action,headers={'Access-Control-Allow-Origin':local,'Content-Type':'application/json'};
-  if(mode==='error'&&action==='list')return route.fulfill({status:503,headers,body:JSON.stringify({version:1,error:{code:'UNAVAILABLE'}})});
+  if(((mode==='error'||mode==='offline')&&action==='list')||(mode==='similar-error'&&action==='similar')){if(mode==='offline')return route.abort();return route.fulfill({status:503,headers,body:JSON.stringify({version:1,error:{code:'UNAVAILABLE'}})});}
   let body,status=200;
   const available=mode==='empty'?[]:rows;
   if(action==='options'){
@@ -47,8 +50,13 @@ const server=http.createServer((req,res)=>{
   }else if(action==='list'){
    const filters=parseFilters(u.searchParams,choices).filters;
    const result=sortProperties(filterProperties(available,filters),filters.orden),current=Number(u.searchParams.get('page')),size=Number(u.searchParams.get('pageSize'));
-   body={version:1,data:result.slice((current-1)*size,current*size),pagination:{page:current,pageSize:size,total:result.length,totalPages:Math.ceil(result.length/size),hasNext:current*size<result.length}};
-   if(mode==='race'&&filters.tipo==='casa')await new Promise(r=>setTimeout(r,250));
+   let pageRows=result.slice((current-1)*size,current*size);
+   if(mode==='expired')pageRows=pageRows.map(v=>({...v,imagen:{...image,expiresAt:new Date(Date.now()-1000).toISOString()}}));
+   if(mode==='jpeg')pageRows=pageRows.map(v=>({...v,imagen:{...image,webp:[]}}));
+   if(mode==='local')pageRows=pageRows.map(v=>({...v,imagen:original[0].imagen}));
+   body={version:1,data:pageRows,pagination:{page:current,pageSize:size,total:result.length,totalPages:Math.ceil(result.length/size),hasNext:current*size<result.length}};
+   if(mode==='slow')await slowGate;
+   else if(mode==='race'&&filters.tipo==='casa')await new Promise(r=>setTimeout(r,250));
   }else if(action==='featured')body={version:1,data:available.filter(v=>v.destacada).slice(0,6)};
   else if(action==='detail'){const found=available.find(v=>v.id===u.searchParams.get('id'));body=found?{version:1,data:found}:{version:1,error:{code:'NOT_FOUND'}};if(!found)status=404;}
   else if(action==='similar')body={version:1,data:available.filter(v=>v.id!==u.searchParams.get('id')).slice(0,3)};
@@ -62,6 +70,7 @@ const server=http.createServer((req,res)=>{
  await page.getByRole('navigation',{name:'Páginas del catálogo'}).getByRole('button',{name:'Siguiente'}).click();
  await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===1);assert.match(page.url(),/page=2/);
  await page.goBack();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);
+ await page.goForward();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===1);await page.goBack();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);
  await page.locator('#filter-currency').selectOption('USD');await page.locator('#price-max').fill('0');await page.getByRole('button',{name:'Aplicar filtros'}).click();await page.locator('#empty-results').waitFor({state:'visible'});
  await page.locator('#clear-empty').click();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);
  mode='race';await page.locator('#filter-type').selectOption('casa');await page.getByRole('button',{name:'Aplicar filtros'}).click();await page.locator('#filter-type').selectOption('departamento');await page.getByRole('button',{name:'Aplicar filtros'}).click();
@@ -76,9 +85,22 @@ const server=http.createServer((req,res)=>{
  await page.goto(base+'propiedad.html?id=nexo-missing');await page.locator('#detail-error').waitFor({state:'visible'});
  for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:900});await page.goto(base+'propiedades.html');await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Overflow at ${width}`);
+  if(process.env.NEXO_PREVIEW_SCREENSHOTS&&[390,1440].includes(width)){const directory=path.resolve(process.env.NEXO_PREVIEW_SCREENSHOTS);fs.mkdirSync(directory,{recursive:true});await page.waitForFunction(()=>document.querySelector('#catalog-properties img')?.naturalWidth>0);await page.screenshot({path:path.join(directory,`catalog-api-${width}.png`)});}
  }
+ // Extra V5D.4 scenarios: no administrative session, image fallbacks, expiry and loading.
+ mode='jpeg';await page.goto(base+'propiedades.html');await page.waitForFunction(()=>document.querySelector('#catalog-properties img')?.naturalWidth>0);assert.equal(await page.locator('#catalog-properties source').count(),0);assert.match(await page.locator('#catalog-properties img').first().getAttribute('srcset'),/960w/);
+ mode='local';await page.reload();await page.waitForFunction(()=>document.querySelector('#catalog-properties img')?.naturalWidth>0);assert.match(await page.locator('#catalog-properties img').first().getAttribute('src'),/^assets\//);
+ mode='expired';await page.reload();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);assert.equal(await page.locator('#catalog-properties img').count(),0);assert(await page.locator('#catalog-properties .property-image-placeholder').first().isVisible());
+ mode='populated';imageMode='broken';await page.reload();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);await page.waitForFunction(()=>!document.querySelector('#catalog-properties > li:first-child picture'));assert(await page.locator('#catalog-properties .property-image-placeholder').first().isVisible());imageMode='normal';
+ mode='offline';await page.reload();await page.waitForFunction(()=>document.querySelector('#catalog-count').textContent==='Catálogo no disponible');assert(await page.locator('#empty-results').isHidden());
+ slowGate=new Promise(resolve=>{releaseSlow=resolve;});mode='slow';await page.reload();await page.locator('#catalog-properties[aria-busy="true"]').waitFor({state:'attached'});assert.match(await page.locator('#catalog-count').textContent(),/Cargando/);releaseSlow();await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);
+ mode='similar-error';await page.goto(base+'propiedad.html?id=nexo-001');await page.locator('#property-detail').waitFor({state:'visible'});assert(await page.locator('#similar-section').isHidden());
+ assert(await page.locator('#whatsapp-link').isHidden());assert.match(await page.locator('#inquiry-message').inputValue(),/nexo-001/);assert.match(await page.locator('#inquiry-message').inputValue(),/propiedad\.html\?id=nexo-001/);
+ mode='populated';await page.setViewportSize({width:390,height:900});await page.goto(base+'propiedades.html');await page.waitForFunction(()=>document.querySelectorAll('#catalog-properties .property-card').length===12);await page.locator('.menu-toggle').click();assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'),'true');await page.locator('.menu-toggle').click();assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'),'false');
+ await page.locator('#filter-panel summary').focus();await page.keyboard.press('Enter');assert(await page.locator('#filter-panel').evaluate(n=>n.open));
+ await page.waitForFunction(()=>document.querySelector('#catalog-properties img')?.naturalWidth>0);await page.clock.install();await page.clock.fastForward(310000);await page.evaluate(()=>{document.querySelector('#catalog-properties img').dispatchEvent(new Event('error'));});assert.match(await page.locator('#catalog-properties .property-image-placeholder').first().textContent(),/venció/);assert(await page.locator('#catalog-properties .property-image-placeholder').first().isVisible());
  assert.deepEqual(unexpected,[]);assert.deepEqual(errors,[]);assert(calls.some(v=>v.action==='list'&&v.params.get('page')==='2'));
- console.log('PASS: Supabase provider simulated end-to-end, signed images, pages/history, filters/reset/races, empty/error/not-found, featured/detail/similar, 320/390/768/1440; no JSON fallback or remote requests.');
+ console.log('PASS: Supabase provider simulated end-to-end, signed images, pages/history, filters/reset/races, empty/error/not-found, featured/detail/similar, 320/390/768/1440; no JSON fallback or remote requests; V5D.4 session isolation, JPEG/local/expired/broken images, timeout/offline/loading, keyboard/menu and WhatsApp checks.');
  await context.close();
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
