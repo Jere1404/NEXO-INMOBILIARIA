@@ -2,6 +2,7 @@
 Default: dry run; Management API is NEVER contacted without --deploy.
 The gateway blocks the source-bundling endpoint, validates actual EZBR/ESZIP
 bytes before upload, and permits at most one mutation of the fixed function.
+A no-op succeeds only after a fresh remote checksum/configuration verification.
 """
 import argparse
 import hashlib
@@ -59,7 +60,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class DeploymentGateway:
-    def __init__(self, root, deploy=False, token=None, validate=None, transport=None):
+    def __init__(self, root, deploy=False, token=None, validate=None, transport=None, expected_report=None):
         self.root = root
         self.deploy = deploy
         self.token = token
@@ -67,6 +68,8 @@ class DeploymentGateway:
         self.mutations = 0
         self.success = False
         self.report = None
+        self.expected_report = expected_report
+        self.blocked = False
         self.validate = validate or self.validate_bundle
         self.transport = transport or self.forward
 
@@ -92,7 +95,71 @@ class DeploymentGateway:
         except (urllib.error.URLError, TimeoutError):
             return 502, b'{"message":"Management API transport failed; outcome uncertain; no automatic retry permitted"}'
 
+    def complete(self, cli_returncode):
+        """Never infer success from CLI output, timestamps or an unverified GET.
+
+        Management API specification: apps/docs/spec/api_v1_openapi.json in
+        supabase/supabase. V1UpdateFunctionBodyEszip defines ezbr_sha256 as the
+        hash of the complete EZBR payload; the function-list response exposes the
+        same OPTIONAL field. Absence is not proof of package identity.
+        """
+        if cli_returncode or self.blocked:
+            raise ValueError('CLI failed or gateway blocked a request; deployment outcome is not accepted')
+        if not self.deploy:
+            if not self.success or self.report is None:
+                raise ValueError('Local preflight did not receive a verified bundle')
+            return 'local-only'
+        uploaded = self.success
+        self.success = False  # Final success requires fresh remote verification.
+        if not self.expected_report or not valid_checksum(self.expected_report.get('sha256')):
+            raise ValueError('A verified local preflight checksum is required')
+        expected = self.expected_report['sha256']
+        if self.mutations and (not uploaded or self.report is None):
+            raise ValueError('Upload failed or its outcome is uncertain; no automatic retry permitted')
+        # Fresh read AFTER the CLI exits. Never trust an earlier CLI GET/cache.
+        status, body = self.transport('GET', BASE, b'', '')
+        if status != 200:
+            raise ValueError('Unable to read current remote function metadata')
+        try:
+            functions = json.loads(body)
+        except (ValueError, TypeError, UnicodeError):
+            raise ValueError('Invalid remote function metadata') from None
+        if not isinstance(functions, list):
+            raise ValueError('Invalid remote function list')
+        matches = [item for item in functions if isinstance(item, dict) and item.get('slug') == SLUG]
+        if len(matches) != 1:
+            raise ValueError('Expected exactly one matching remote function')
+        remote = matches[0]
+        if (remote.get('name') != SLUG or not isinstance(remote.get('id'), str)
+                or not remote['id'] or remote.get('status') != 'ACTIVE'
+                or remote.get('verify_jwt') is not False):
+            raise ValueError('Remote function identity, ACTIVE status or verify_jwt=false is unverified')
+        entry = remote.get('entrypoint_path')
+        if (not isinstance(entry, str) or not entry.startswith('file:///')
+                or not entry.endswith('/supabase/functions/nexo-property-image/index.js')):
+            raise ValueError('Remote entrypoint is missing or differs from the fixed function')
+        import_map = remote.get('import_map_path')
+        if import_map and (not isinstance(import_map, str) or not import_map.startswith('file:///')
+                           or not import_map.endswith('/supabase/functions/nexo-property-image/deno.json')):
+            raise ValueError('Remote import-map configuration differs from the fixed function')
+        checksum = remote.get('ezbr_sha256')
+        if not valid_checksum(checksum):
+            raise ValueError('Remote EZBR checksum is missing or invalid; package identity cannot be verified')
+        if not hmac.compare_digest(checksum, expected):
+            raise ValueError('Remote EZBR checksum differs from the verified local package')
+        self.success = True
+        result = 'uploaded-and-verified' if self.mutations else 'unchanged-and-verified'
+        print('REMOTE VERIFIED: ' + json.dumps({'slug': SLUG, 'sha256': expected, 'result': result}), flush=True)
+        return result
+
     def handle(self, method, target, body, content_type):
+        try:
+            return self._handle(method, target, body, content_type)
+        except Exception:
+            self.blocked = True
+            raise
+
+    def _handle(self, method, target, body, content_type):
         fields = validate_target(method, target, content_type)
         if fields == 'read':
             return self.transport(method, target, b'', '') if self.deploy else (200, b'[]')
@@ -103,6 +170,8 @@ class DeploymentGateway:
         report = self.validate(body)
         if fields.get('ezbr_sha256') != report['sha256'] or report['sha256'] != hashlib.sha256(body).hexdigest():
             raise ValueError('CLI bundle checksum differs from verified artifact')
+        if self.expected_report and report['sha256'] != self.expected_report.get('sha256'):
+            raise ValueError('Local bundle changed since preflight; upload is forbidden')
         self.report = report
         print('REAL BUNDLE: ' + json.dumps(report), flush=True)
         self.mutations += 1
@@ -137,10 +206,12 @@ def make_handler(gateway):
                     raise ValueError('Incomplete request body')
                 status, result = gateway.handle(self.command, self.path, body, self.headers.get('Content-Type', ''))
             except ValueError as error:
+                gateway.blocked = True
                 if self.command != 'GET':
                     print('Bundle guard blocked request: ' + str(error), flush=True)
                 status, result = 400, b'{"message":"Blocked by local bundle guard: invalid artifact/size, forbidden fallback, metadata, endpoint or retry"}'
             except Exception:
+                gateway.blocked = True
                 print('Bundle guard failed closed before forwarding.', flush=True)
                 status, result = 400, b'{"message":"Bundle guard failed; no fallback permitted"}'
             self.send_response(status)
@@ -152,6 +223,39 @@ def make_handler(gateway):
             self.close_connection = True
         do_GET = do_POST = do_PATCH = do_PUT = do_DELETE = process
     return Handler
+
+
+def valid_checksum(value):
+    return isinstance(value, str) and len(value) == 64 and all(c in '0123456789abcdef' for c in value)
+
+
+def run_cli(root, gateway):
+    with tempfile.TemporaryDirectory(prefix='nexo-docker-deploy-') as temporary:
+        directory = pathlib.Path(temporary)
+        server = HTTPServer(('127.0.0.1', 0), make_handler(gateway))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        profile = directory / 'profile.yaml'
+        profile.write_text(f'name: nexo-bundle-guard\napi_url: http://127.0.0.1:{server.server_port}\nproject_host: supabase.co\ndashboard_url: https://supabase.com/dashboard\n')
+        env = os.environ.copy()
+        # The real credential stays in the gateway process, never in CLI, Docker or profile files.
+        env['SUPABASE_ACCESS_TOKEN'] = gateway.local_token
+        env['SUPABASE_HOME'] = str(directory / 'cli-state')
+        for name in ('NO_PROXY', 'no_proxy'):
+            env[name] = env.get(name, '') + ',127.0.0.1,localhost'
+        try:
+            version = subprocess.check_output(['supabase', '--version'], env=env, text=True).strip().removeprefix('supabase ').removeprefix('v')
+            if version != '2.122.0':
+                raise SystemExit('Supabase CLI 2.122.0 is required for the reviewed bundle protocol')
+            print('Mode: ' + ('AUTHORIZED DEPLOY' if gateway.deploy else 'LOCAL DRY RUN; no Management API access'), flush=True)
+            result = subprocess.run(['supabase', 'functions', 'deploy', SLUG, '--project-ref', PROJECT,
+                                     '--use-docker', '--profile', str(profile), '--output-format', 'text'], cwd=root, env=env,
+                                    stdout=None if gateway.deploy else subprocess.DEVNULL)
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+        return gateway.complete(result.returncode)
 
 
 def main():
@@ -168,36 +272,16 @@ def main():
     token = os.environ.get('SUPABASE_ACCESS_TOKEN') if args.deploy else None
     if args.deploy and not token:
         raise SystemExit('Missing GitHub Actions SUPABASE_ACCESS_TOKEN secret')
-    gateway = DeploymentGateway(root, deploy=args.deploy, token=token)
-    with tempfile.TemporaryDirectory(prefix='nexo-docker-deploy-') as temporary:
-        directory = pathlib.Path(temporary)
-        server = HTTPServer(('127.0.0.1', 0), make_handler(gateway))
-        thread = threading.Thread(target=server.serve_forever, daemon=True)
-        thread.start()
-        profile = directory / 'profile.yaml'
-        profile.write_text(f'name: nexo-bundle-guard\napi_url: http://127.0.0.1:{server.server_port}\nproject_host: supabase.co\ndashboard_url: https://supabase.com/dashboard\n')
-        env = os.environ.copy()
-        # The real credential stays in the gateway process, never in CLI, Docker or profile files.
-        env['SUPABASE_ACCESS_TOKEN'] = gateway.local_token
-        env['SUPABASE_HOME'] = str(directory / 'cli-state')
-        for name in ('NO_PROXY', 'no_proxy'):
-            env[name] = env.get(name, '') + ',127.0.0.1,localhost'
-        version = subprocess.check_output(['supabase', '--version'], env=env, text=True).strip().removeprefix('supabase ').removeprefix('v')
-        if version != '2.122.0':
-            server.shutdown();server.server_close();thread.join()
-            raise SystemExit('Supabase CLI 2.122.0 is required for the reviewed bundle protocol')
-        print('Mode: ' + ('AUTHORIZED DEPLOY' if args.deploy else 'LOCAL DRY RUN; no Management API access'), flush=True)
-        try:
-            result = subprocess.run(['supabase', 'functions', 'deploy', SLUG, '--project-ref', PROJECT,
-                                     '--use-docker', '--profile', str(profile), '--output-format', 'text'], cwd=root, env=env,
-                                    stdout=None if args.deploy else subprocess.DEVNULL)
-        finally:
-            server.shutdown()
-            server.server_close()
-            thread.join()
-        if result.returncode or not gateway.success or gateway.report is None:
-            raise SystemExit('Docker deployment/preflight failed or no verified bundle was received. No source API fallback was forwarded.')
-        print('Completed: ' + ('one verified bundle upload' if args.deploy else 'local bundle validation ONLY; nothing deployed'), flush=True)
+    # Force local bundling against an empty simulated function list. No real
+    # credential or Management API request is used during this preflight.
+    preflight = DeploymentGateway(root)
+    run_cli(root, preflight)
+    if not args.deploy:
+        print('Completed: local bundle validation ONLY; nothing deployed', flush=True)
+        return
+    gateway = DeploymentGateway(root, deploy=True, token=token, expected_report=preflight.report)
+    outcome = run_cli(root, gateway)
+    print('Completed: ' + outcome, flush=True)
 
 
 if __name__ == '__main__':
