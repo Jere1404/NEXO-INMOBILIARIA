@@ -71,6 +71,57 @@ class DeploymentGuardTests(unittest.TestCase):
         with self.assertRaises(ValueError):g.handle('POST',TARGET,BODY,TYPE)
         self.assertEqual(calls,[]);self.assertEqual(g.mutations,0)
 
+    def test_optional_project_probe_is_local_in_both_modes_and_is_not_a_bundle(self):
+        for deploy in [False, True]:
+            with self.subTest(deploy=deploy):
+                calls = []
+                g = self.gateway(deploy=deploy, transport=lambda *args: calls.append(args))
+                status, response = g.handle('GET', '/v1/projects/' + guard.PROJECT, b'', '')
+                self.assertEqual(status, 404)
+                self.assertEqual(calls, [])
+                self.assertFalse(g.blocked)
+                self.assertFalse(g.success)
+                self.assertIsNone(g.report)
+                self.assertEqual(g.mutations, 0)
+                with self.assertRaises(ValueError):
+                    g.complete(0)
+
+    def test_project_probe_exception_does_not_allow_other_routes_or_writes(self):
+        for method, path in [
+            ('GET', '/v1/projects/' + 'a' * 20),
+            ('GET', '/v1/projects/' + guard.PROJECT + '?extra=true'),
+            ('GET', '/v1/projects/' + guard.PROJECT + '/database'),
+            ('POST', '/v1/projects/' + guard.PROJECT),
+            ('PATCH', '/v1/projects/' + guard.PROJECT),
+            ('DELETE', '/v1/projects/' + guard.PROJECT),
+        ]:
+            with self.subTest(method=method, path=path):
+                g = self.gateway(transport=lambda *args: self.fail('Unexpected remote call'))
+                with self.assertRaises(ValueError):
+                    g.handle(method, path, b'', '')
+                self.assertTrue(g.blocked)
+
+    def test_optional_project_probe_still_requires_local_authorization(self):
+        g = self.gateway(transport=lambda *args: self.fail('Unexpected remote call'))
+        server = guard.HTTPServer(('127.0.0.1', 0), guard.make_handler(g))
+        thread = guard.threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5)
+        try:
+            connection.request('GET', '/v1/projects/' + guard.PROJECT,
+                               headers={'Authorization': 'Bearer invalid-local-test'})
+            response = connection.getresponse()
+            self.assertEqual(response.status, 400)
+            response.read()
+            self.assertTrue(g.blocked)
+            with self.assertRaisesRegex(ValueError, 'blocked'):
+                g.complete(0)
+        finally:
+            connection.close()
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
     def test_missing_docker_stops_before_starting_cli(self):
         with tempfile.TemporaryDirectory(prefix='nexo-no-docker-test-') as name:
             directory = pathlib.Path(name)
@@ -288,6 +339,45 @@ class DeploymentCompletionTests(unittest.TestCase):
         self.assertEqual([call[0] for call in self.calls], ['GET', 'GET'])
         self.assertEqual(remote.mutations, 0)
         self.assertEqual(preflight.mutations, 1)
+
+    def test_dry_run_cli_optional_project_probe_after_valid_bundle_is_not_a_failed_deploy(self):
+        # Supabase CLI 2.122.0 performs this optional GET after its successful
+        # upload simulation, ignores its rejection, and exits 0. Previously that
+        # left blocked=True despite REAL BUNDLE + DRY RUN and complete() raised.
+        gateway = guard.DeploymentGateway(pathlib.Path('.'),
+            validate=lambda body: self.report,
+            transport=lambda *args: self.fail('Dry run must never contact Supabase'))
+
+        def cli_request(command, cwd, env, stdout):
+            profile = pathlib.Path(command[command.index('--profile') + 1]).read_text()
+            url = next(line.split(': ', 1)[1] for line in profile.splitlines() if line.startswith('api_url:'))
+            parsed = guard.urllib.parse.urlsplit(url)
+            connection = http.client.HTTPConnection(parsed.hostname, parsed.port, timeout=5)
+            headers = {'Authorization': 'Bearer ' + env['SUPABASE_ACCESS_TOKEN']}
+            try:
+                connection.request('GET', guard.BASE, headers=headers)
+                response = connection.getresponse()
+                self.assertEqual(json.loads(response.read()), [])
+                headers['Content-Type'] = TYPE
+                connection.request('POST', TARGET, BODY, headers)
+                response = connection.getresponse()
+                self.assertEqual(response.status, 201)
+                response.read()
+                connection.request('GET', '/v1/projects/' + guard.PROJECT, headers=headers)
+                response = connection.getresponse()
+                self.assertIn(response.status, (400, 404))
+                response.read()  # CLI ignores this optional project-cache lookup.
+                return mock.Mock(returncode=0)
+            finally:
+                connection.close()
+
+        with mock.patch.object(guard.subprocess, 'check_output', return_value='2.122.0'), \
+             mock.patch.object(guard.subprocess, 'run', side_effect=cli_request):
+            self.assertEqual(guard.run_cli(pathlib.Path('.'), gateway), 'local-only')
+        self.assertIn('REAL BUNDLE:', self.output.getvalue())
+        self.assertIn('DRY RUN:', self.output.getvalue())
+        self.assertFalse(gateway.blocked)
+        self.assertEqual(gateway.mutations, 1)
 
     def test_main_runs_offline_preflight_before_deploy_and_copies_its_report(self):
         seen = []
