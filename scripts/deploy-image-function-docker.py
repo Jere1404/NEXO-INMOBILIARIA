@@ -32,6 +32,8 @@ def validate_target(method, target, content_type):
         raise ValueError('Only relative paths are accepted')
     if method == 'GET' and url.path == BASE and not url.query:
         return 'read'
+    if method == 'GET' and url.path == f'/v1/projects/{PROJECT}' and not url.query:
+        return 'local-project-probe'
     expected = BASE if method == 'POST' else BASE + '/' + SLUG
     if method not in ('POST', 'PATCH') or url.path != expected:
         raise ValueError('Source API fallback, other functions, SQL and unrelated endpoints are forbidden')
@@ -161,6 +163,10 @@ class DeploymentGateway:
 
     def _handle(self, method, target, body, content_type):
         fields = validate_target(method, target, content_type)
+        if fields == 'local-project-probe':
+            # CLI 2.122.0 optionally probes project metadata after bundling.
+            # Deny locally in BOTH modes: never forward or fabricate project data.
+            return 404, b'{"message":"Project metadata unavailable through this gateway"}'
         if fields == 'read':
             return self.transport(method, target, b'', '') if self.deploy else (200, b'[]')
         if self.mutations:
