@@ -4,7 +4,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const root=path.resolve(__dirname,'../..'),pages='https://jere1404.github.io',prefix='/NEXO-INMOBILIARIA/';
 const configPath=path.join(root,'assets/js/public-data-config.js'),originalConfig=fs.readFileSync(configPath,'utf8');
-assert(originalConfig.includes("provider: 'json'"),'Repository must stay on JSON');
+assert(originalConfig.includes("provider: 'supabase'"),'Preview must use the repository Supabase configuration');
 const api=new URL(/apiBaseUrl:\s*'([^']+)'/.exec(originalConfig)[1]);
 const publicCode=process.env.NEXO_PREVIEW_PUBLIC_CODE;
 if(publicCode)assert(/^[a-z0-9][a-z0-9_-]{2,79}$/.test(publicCode),'Invalid public code');
@@ -27,7 +27,7 @@ const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.jpg'
     if(!['index.html','propiedades.html','propiedad.html'].includes(relative)&&!relative.startsWith('assets/'))return deny();
     const file=path.resolve(root,relative);if(!file.startsWith(root+path.sep))return deny();
     try{
-     let body=fs.readFileSync(file);if(file===configPath)body=Buffer.from(originalConfig.replace("provider: 'json'","provider: 'supabase'"));
+     const body=fs.readFileSync(file);
      return route.fulfill({contentType:mime[path.extname(file)]||'application/octet-stream',body});
     }catch{return route.fulfill({status:404});}
    }
@@ -66,7 +66,7 @@ const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.jpg'
    await page.goto(pages+prefix+'propiedad.html?id=nexo-preview-no-existe');await page.locator('#detail-error').waitFor({state:'visible'});
   }
   assert.deepEqual(errors,[]);assert.equal(counts.blocked,0);assert.equal(fs.readFileSync(configPath,'utf8'),originalConfig);
-  console.log(JSON.stringify({result:'PASS',mode:'live-read-only',visibleOnFirstPage:visible,publishedDetailTest:!!publicCode,counts,operations,repositoryProvider:'json'}));
+  console.log(JSON.stringify({result:'PASS',mode:'live-read-only',visibleOnFirstPage:visible,publishedDetailTest:!!publicCode,counts,operations,repositoryProvider:'supabase'}));
   if(process.env.NEXO_PREVIEW_HEADED==='1'){
    await page.goto(pages+prefix+'index.html');
    await page.evaluate(()=>{document.title='NEXO V5D.4 — PREVIEW AISLADA';});

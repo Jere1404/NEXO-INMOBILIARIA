@@ -31,6 +31,7 @@ const server = http.createServer((req, res) => {
     const page = await context.newPage(), errors = [], unexpected = [];
     page.on('pageerror', error => errors.push(error.message));
     const state = { enabled: true, failProcess: true, failList: false, failListAfterProcess: false, failSigned: false, failImage: false, originals: new Set(), images: [], replacements: [], reserves: [], uploads: 0, processes: 0, saves: 0 };
+    let jsonRollback = false;
     let row = { id: property, version: 1, public_code: 'nexo-local-fixture', title: 'Casa ficticia local', description: 'Descripción de prueba local', property_type: 'casa', operation: 'venta', status: 'draft', price: 150000, currency: 'USD', zone_slug: 'centro', city: 'Corrientes Capital', area: 120, bedrooms: 2, bathrooms: 1, approximate_location: 'Zona Centro', featured: false, is_demo: true };
     await context.addInitScript(({ host, user }) => {
       const token = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })) + '.' + btoa(JSON.stringify({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600 })) + '.local-fixture';
@@ -39,6 +40,7 @@ const server = http.createServer((req, res) => {
     await context.routeWebSocket(/.*/, route => { unexpected.push('WebSocket blocked'); route.close(); });
     await context.route('**/*', async route => {
       const req = route.request(), url = new URL(req.url()), pathname = url.pathname;
+      if (jsonRollback && url.origin === origin && pathname.endsWith('/public-data-config.js')) return route.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(path.join(root, 'assets/js/public-data-config.js'), 'utf8').replace("provider: 'supabase'", "provider: 'json'") });
       if (url.origin === origin) return route.continue();
       if (url.origin !== 'https://' + host) { unexpected.push(req.method() + ' ' + url.origin); return route.abort(); }
       const headers = { 'access-control-allow-origin': origin, 'access-control-allow-headers': 'authorization,apikey,content-type,x-client-info', 'access-control-allow-methods': 'GET,POST,OPTIONS' };
@@ -216,7 +218,8 @@ const server = http.createServer((req, res) => {
     await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
     await page.locator('#editor-login').waitFor({ state: 'visible' });
     assert(await page.locator('#image-panel').isHidden()); assert.equal(await page.locator('#image-gallery img').count(), 0); assert.deepEqual([state.reserves.length, state.uploads, state.processes], beforeDenied);
-    // Public pages keep using their local JSON and all existing photos.
+    // Explicit rollback regression; the default Supabase path is covered in public-provider.cjs.
+    jsonRollback = true;
     await page.setViewportSize({ width: 1440, height: 1000 });
     const data = JSON.parse(fs.readFileSync(path.join(root, 'data/propiedades.json'), 'utf8'));
     await page.goto(base + 'index.html'); await page.waitForFunction(() => document.querySelectorAll('.property-card').length === 6);

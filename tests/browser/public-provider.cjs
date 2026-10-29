@@ -1,4 +1,4 @@
-// Local only: switch the provider in intercepted JS, never in the repository.
+// Local only: exercise the repository provider setting against a simulated API.
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {pathToFileURL}=require('node:url');
@@ -32,7 +32,6 @@ const server=http.createServer((req,res)=>{
  await context.route('**/*',async route=>{
   const u=new URL(route.request().url());
   if(u.origin===local){
-   if(u.pathname.endsWith('/public-data-config.js'))return route.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(root,'assets/js/public-data-config.js'),'utf8').replace("provider: 'json'","provider: 'supabase'")});
    if(u.pathname.endsWith('/data/propiedades.json')){unexpected.push('JSON fallback');return route.abort();}
    return route.continue();
   }

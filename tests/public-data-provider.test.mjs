@@ -12,14 +12,14 @@ const signed=(format='jpg',expiresAt=new Date(Date.now()+240000).toISOString())=
 const envelope=(rows,total=rows.length,page=1,pageSize=12)=>({version:1,data:rows,pagination:{page,pageSize,total,totalPages:Math.ceil(total/pageSize),hasNext:page*pageSize<total}});
 function remote(responder){const calls=[];const provider=createPublicDataProvider({...publicDataConfig,provider:'supabase'},{fetchImpl:async(url,options)=>{calls.push({url:new URL(url),options});return responder(new URL(url),options,calls.length);},loadJson:()=>{throw new Error('NO_JSON_FALLBACK');}});return {provider,calls};}
 const response=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
-test('active setting remains JSON; all public requests stay local and existing data is reused',async()=>{
- assert.equal(publicDataConfig.provider,'json');let loads=0;
- const provider=createPublicDataProvider(publicDataConfig,{loadJson:async()=>{loads++;return data;},fetchImpl:()=>{throw new Error('Unexpected remote access');}});
+test('explicit JSON rollback keeps requests local and reuses existing data',async()=>{
+ let loads=0;
+ const provider=createPublicDataProvider({...publicDataConfig,provider:'json'},{loadJson:async()=>{loads++;return data;},fetchImpl:()=>{throw new Error('Unexpected remote access');}});
  const list=await provider.list();assert.equal(list.total,12);assert.equal(list.properties.length,12);assert.equal(list.availableTotal,12);
  assert.equal((await provider.featured()).length,6);assert.equal((await provider.detail('nexo-001')).id,'nexo-001');assert((await provider.similar('nexo-001')).length<=3);assert.equal((await provider.allOptions({scope:'zones'})).length,5);assert.equal(loads,1);
 });
 test('JSON provider preserves filters, currencies, pagination, reset and not-found',async()=>{
- const provider=createPublicDataProvider(publicDataConfig,{loadJson:async()=>data});
+ const provider=createPublicDataProvider({...publicDataConfig,provider:'json'},{loadJson:async()=>data});
  const page=await provider.list({page:2,pageSize:5});assert.equal(page.properties.length,5);assert.equal(page.total,12);assert(page.hasNext);
  const matched=await provider.list({filters:{tipo:'casa',operacion:'venta',moneda:'USD',precioMin:1,comodidades:['patio'],orden:'precio-desc'}});
  assert(matched.properties.every(v=>v.tipo==='casa'&&v.operacion==='venta'&&v.moneda==='USD'&&v.comodidades.includes('patio')));
@@ -76,7 +76,7 @@ test('request cancellation is propagated without exposing transport messages',as
  const pending=f.provider.list({signal:controller.signal});controller.abort();await assert.rejects(()=>pending,e=>e.name==='AbortError');
 });
 test('a failed JSON request can retry and an API timeout never falls back to JSON',async()=>{
- let attempts=0;const local=createPublicDataProvider(publicDataConfig,{loadJson:()=>{if(++attempts===1)throw new Error('temporary');return data;}});
+ let attempts=0;const local=createPublicDataProvider({...publicDataConfig,provider:'json'},{loadJson:()=>{if(++attempts===1)throw new Error('temporary');return data;}});
  await assert.rejects(()=>local.list());assert.equal((await local.list()).total,12);
  const provider=createPublicDataProvider({...publicDataConfig,provider:'supabase'},{timeoutMs:5,fetchImpl:(url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('private timeout detail')),{once:true})),loadJson:()=>{throw new Error('NO_FALLBACK');}});
  await assert.rejects(()=>provider.list(),e=>e.code==='UNAVAILABLE'&&!e.message.includes('private'));
@@ -84,4 +84,18 @@ test('a failed JSON request can retry and an API timeout never falls back to JSO
 test('featured and similar responses must match their purpose',async()=>{
  await assert.rejects(()=>remote(()=>response({version:1,data:[{...data[0],destacada:false}]})).provider.featured());
  await assert.rejects(()=>remote(()=>response({version:1,data:[data[0]]})).provider.similar(data[0].id));
+});
+
+test('deployment default uses Supabase without JSON fallback or admin credentials',async()=>{
+ assert.equal(publicDataConfig.provider,'supabase');
+ let calls=0;
+ const provider=createPublicDataProvider(publicDataConfig,{
+  fetchImpl:async(url,options)=>{
+   calls++;assert.equal(new URL(url).origin,new URL(api).origin);
+   assert.equal(options.credentials,'omit');assert.equal(options.cache,'no-store');
+   assert(!options.headers.Authorization&&!options.headers.apikey);
+   return response(envelope([{...data[0],titulo:'Título actualizado en Supabase'}]));
+  },loadJson:()=>{throw new Error('NO_JSON_FALLBACK');}
+ });
+ assert.equal((await provider.list()).properties[0].titulo,'Título actualizado en Supabase');assert.equal(calls,1);
 });
