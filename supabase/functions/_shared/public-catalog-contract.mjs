@@ -65,7 +65,7 @@ export function projectPublishedProperty(row,{detail=false}={}){
 }
 // Internal delivery plan, NOT a public DTO. Never accept these paths from a request.
 export function authorizePublicImage(property,image){
-  if(!projectPublishedProperty(property)||!uuid(property.id)||image?.property_id!==property.id||!uuid(image.id)||image.processing_status!=='ready'||image.cleanup_requested_at!==null||!positive(image.width)||!positive(image.height)||!text(image.alt,500)||!['ai','licensed','owner_authorized'].includes(image.source_kind)||typeof image.illustrative!=='boolean'||(image.source_kind==='ai'&&!image.illustrative))return null;
+  if(image?.image_active===false||!projectPublishedProperty(property)||!uuid(property.id)||image?.property_id!==property.id||!uuid(image.id)||image.processing_status!=='ready'||image.cleanup_requested_at!==null||!positive(image.width)||!positive(image.height)||!text(image.alt,500)||!['ai','licensed','owner_authorized'].includes(image.source_kind)||typeof image.illustrative!=='boolean'||(image.source_kind==='ai'&&!image.illustrative))return null;
   const base={width:image.width,height:image.height,alt:image.alt,sourceKind:image.source_kind,illustrative:image.illustrative};
   const prefix=`properties/${property.id}/${image.id}/`;
   let allowed;

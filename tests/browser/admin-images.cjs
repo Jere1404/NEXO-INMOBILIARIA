@@ -30,7 +30,7 @@ const server = http.createServer((req, res) => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block' });
     const page = await context.newPage(), errors = [], unexpected = [];
     page.on('pageerror', error => errors.push(error.message));
-    const state = { enabled: true, failProcess: true, failList: false, failListAfterProcess: false, failSigned: false, failImage: false, originals: new Set(), images: [], reserves: [], uploads: 0, processes: 0, saves: 0 };
+    const state = { enabled: true, failProcess: true, failList: false, failListAfterProcess: false, failSigned: false, failImage: false, originals: new Set(), images: [], replacements: [], reserves: [], uploads: 0, processes: 0, saves: 0 };
     let row = { id: property, version: 1, public_code: 'nexo-local-fixture', title: 'Casa ficticia local', description: 'Descripción de prueba local', property_type: 'casa', operation: 'venta', status: 'draft', price: 150000, currency: 'USD', zone_slug: 'centro', city: 'Corrientes Capital', area: 120, bedrooms: 2, bathrooms: 1, approximate_location: 'Zona Centro', featured: false, is_demo: true };
     await context.addInitScript(({ host, user }) => {
       const token = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })) + '.' + btoa(JSON.stringify({ sub: user.id, exp: Math.floor(Date.now() / 1000) + 3600 })) + '.local-fixture';
@@ -59,18 +59,41 @@ const server = http.createServer((req, res) => {
         const values = [{ slug: 'centro', name: 'Centro', locality_id: locality }];
         return reply(url.searchParams.has('slug') ? values[0] : values);
       }
-      if (pathname.endsWith('/property_images')) return state.failList ? reply({ message: 'Local simulated failure' }, 503) : reply(state.images);
+      if (pathname.endsWith('/image_replacements')) return reply(state.replacements);
+      if (pathname.endsWith('/property_images')) {
+        let rows=state.images;
+        if(url.searchParams.has('image_active')) rows=rows.filter(r=>r.image_active!==false);
+        if(url.searchParams.has('id')){const ids=url.searchParams.get('id').slice(4,-1).split(',');rows=rows.filter(r=>ids.includes(r.id));}
+        return state.failList ? reply({ message: 'Local simulated failure' }, 503) : reply(rows);
+      }
       if (pathname.endsWith('/rpc/admin_save_property')) {
         state.saves++; const args = req.postDataJSON(); row = { ...row, ...args.p_data, id: property, version: row.version + 1 }; return reply(row);
       }
       if (pathname === '/functions/v1/nexo-property-image') {
         assert.equal(req.method(), 'POST'); assert(req.headers().authorization?.startsWith('Bearer ')); assert.equal(JSON.parse(Buffer.from(req.headers().authorization.slice(7).split('.')[1], 'base64').toString()).sub, user.id);
         const body = req.postDataJSON();
-        if (body.action === 'reserve') {
+        if (['confirmReplacement','revertReplacement'].includes(body.action)) {
+          const op=state.replacements.find(op=>op.id===body.requestId);assert(op);
+          const source=state.images.find(r=>r.id===op.source_image_id),candidate=state.images.find(r=>r.id===op.candidate_image_id);
+          if(body.action==='confirmReplacement'){
+            assert.equal(candidate.processing_status,'ready');
+            candidate.position=source.position;candidate.is_primary=source.is_primary;candidate.image_active=true;
+            source.position=op.candidate_position;source.is_primary=false;source.image_active=false;op.state='confirmed';
+          }else{
+            if(op.state==='confirmed')Object.assign(source,op.original);
+            candidate.position=op.candidate_position;candidate.is_primary=false;candidate.image_active=false;op.state='reverted';
+          }
+          return reply({id:op.id,property_id:property,state:op.state});
+        }
+        if (body.action === 'reserve'||body.action === 'prepareReplacement') {
           state.reserves.push(body);
           let image = state.images.find(value => value.id === body.requestId);
           if (image && (image.alt !== body.alt || image.source_kind !== body.sourceKind || image.illustrative !== body.illustrative)) return reply({ code: 'INVALID_REQUEST' }, 400);
-          if (!image) { image = { id: body.requestId, property_id: property, storage_kind: 'managed', processing_status: 'pending', processing_attempts: 0, alt: body.alt, source_kind: body.sourceKind, illustrative: body.illustrative, storage_prefix: `properties/${property}/${body.requestId}/`, original_object_key: `properties/${property}/${body.requestId}/original.jpg` }; state.images.push(image); }
+          if (!image) { image = { id: body.requestId, property_id: property, storage_kind: 'managed', image_active:body.action!=='prepareReplacement',is_primary:false,position:state.images.length, processing_status: 'pending', processing_attempts: 0, alt: body.alt, source_kind: body.sourceKind, illustrative: body.illustrative, storage_prefix: `properties/${property}/${body.requestId}/`, original_object_key: `properties/${property}/${body.requestId}/original.jpg` }; state.images.push(image); }
+          if(body.action==='prepareReplacement'&&!state.replacements.some(op=>op.id===image.id)){
+            const source=state.images.find(r=>r.id===body.sourceImageId);assert(source);
+            state.replacements.push({id:image.id,property_id:property,source_image_id:source.id,candidate_image_id:image.id,state:'prepared',candidate_position:image.position,original:{...source}});
+          }
           return reply(image);
         }
         assert.equal(body.action, 'process'); state.processes++;
@@ -103,7 +126,7 @@ const server = http.createServer((req, res) => {
       await page.locator('#image-source').selectOption('ai');
     };
     const upload = () => page.locator('#upload-images').click();
-    const legacy = { id: '44444444-4444-4444-8444-444444444444', property_id: property, storage_kind: 'legacy', processing_status: 'ready', processing_attempts: 0, alt: 'Fotografía heredada de referencia', jpeg_path: 'assets/images/propiedades/nexo-001/principal-960.jpg', width: 960, height: 720, webp_variants: [], jpeg_variants: [] };
+    const legacy = { id: '44444444-4444-4444-8444-444444444444', property_id: property, storage_kind: 'legacy', image_active:true,is_primary:true,position:0, processing_status: 'ready', processing_attempts: 0, alt: 'Fotografía heredada de referencia', jpeg_path: 'assets/images/propiedades/nexo-001/principal-960.jpg', width: 960, height: 720, webp_variants: [], jpeg_variants: [] };
     state.images.push(legacy);
     const legacyBefore = JSON.stringify(legacy);
     const managed = () => state.images.find(value => value.storage_kind === 'managed');
@@ -166,6 +189,27 @@ const server = http.createServer((req, res) => {
       await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'nexo-admin-mobile.png'), fullPage: true });
     }
     assert.equal(JSON.stringify(legacy), legacyBefore);
+    // Reversible replacement: preparation is hidden, survives reload, and requires explicit confirmation.
+    await page.locator('#image-replacement-source').selectOption(legacy.id);
+    await select();
+    await upload();
+    await page.getByRole('button',{name:'Confirmar reemplazo',exact:true}).waitFor();
+    assert.equal(legacy.image_active,true);assert.equal(state.replacements.length,1);
+    const replacement=state.images.find(r=>r.id===state.replacements[0].candidate_image_id);
+    assert.equal(replacement.image_active,false);
+    await page.reload();
+    const confirmButton=page.getByRole('button',{name:'Confirmar reemplazo',exact:true});
+    await confirmButton.waitFor();
+    await page.waitForFunction(()=>!Array.from(document.querySelectorAll('#image-replacements button')).find(b=>b.textContent==='Confirmar reemplazo')?.disabled);
+    page.once('dialog',dialog=>dialog.accept());await confirmButton.click();
+    await page.getByRole('button',{name:'Revertir a la original',exact:true}).waitFor();
+    assert.equal(legacy.image_active,false);assert.equal(replacement.image_active,true);assert.equal(replacement.is_primary,true);assert.equal(replacement.position,0);
+    assert.equal(await page.locator('#image-gallery img[alt="Fotografía heredada de referencia"]').count(),0);
+    for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:950});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Replacement overflow '+width);}
+    page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Revertir a la original',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#image-replacements')?.textContent.includes('Reemplazo revertido'));
+    assert.equal(JSON.stringify(legacy),legacyBefore);assert.equal(replacement.image_active,false);assert(state.images.includes(replacement));
+
     await open(null); assert(await page.locator('#image-files').isDisabled());
     await open(); await page.locator('#admin-logout').click(); await page.locator('#editor-login').waitFor({ state: 'visible' }); assert(await page.locator('#image-panel').isHidden());
     await open(); const beforeDenied = [state.reserves.length, state.uploads, state.processes]; state.enabled = false;

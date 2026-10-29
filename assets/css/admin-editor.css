@@ -40,3 +40,9 @@
 .admin-image-grid p { font-size: 12px; line-height: 1.7; }
 @media (min-width: 40rem) { .admin-image-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (min-width: 64rem) { .admin-image-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+
+.replacement-list > section { border: 1px solid var(--border, #ddd); padding: 1rem; margin-block: 1rem; }
+.replacement-comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; }
+.replacement-comparison figure { margin: 0; }
+.replacement-comparison img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+.replacement-list button { margin: .5rem .5rem .5rem 0; }

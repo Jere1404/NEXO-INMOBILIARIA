@@ -2,6 +2,6 @@
   "name": "nexo-backend-security-tests",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test security.test.mjs" },
+  "scripts": { "test": "node --test --test-concurrency=1 *.test.mjs" },
   "devDependencies": { "@electric-sql/pglite": "0.5.11" }
 }

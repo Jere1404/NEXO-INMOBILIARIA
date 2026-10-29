@@ -31,12 +31,22 @@ export function createImageHandler({publicClient,serverClient,codec,allowedOrigi
    if(identity.error||!identity.data?.user?.id)problem('AUTH_REQUIRED',401);
    const actor=identity.data.user.id;const membership=await userClient.from('admin_memberships').select('role,enabled').eq('user_id',actor).maybeSingle();
    if(membership.error)problem('BACKEND_UNAVAILABLE',503);if(!membership.data?.enabled||membership.data.role!=='admin')problem('ACCESS_DENIED',403);
-   const body=await boundedJSON(request);const allowed=body.action==='reserve'?['action','propertyId','requestId','extension','bytes','sha256','alt','sourceKind','illustrative']:body.action==='process'?['action','propertyId','imageId']:[];
+   const body=await boundedJSON(request);
+   const reserveFields=['action','propertyId','requestId','extension','bytes','sha256','alt','sourceKind','illustrative'];
+   const allowed=body.action==='reserve'?reserveFields:body.action==='prepareReplacement'?[...reserveFields,'sourceImageId']:['confirmReplacement','revertReplacement'].includes(body.action)?['action','propertyId','requestId']:body.action==='process'?['action','propertyId','imageId']:[];
    if(!allowed.length||Object.keys(body).some(key=>!allowed.includes(key))||!UUID.test(body.propertyId||''))problem('INVALID_REQUEST');
    const server=serverClient();
-   if(body.action==='reserve'){
+   if(['confirmReplacement','revertReplacement'].includes(body.action)){
+    if(!UUID.test(body.requestId||''))problem('INVALID_REQUEST');
+    const op=await rowRPC(server,body.action==='confirmReplacement'?'nexo_service_confirm_replacement':'nexo_service_revert_replacement',{p_actor:actor,p_property:body.propertyId,p_request:body.requestId});
+    return new Response(JSON.stringify({id:op.id,property_id:op.property_id,state:op.state}),{headers});
+   }
+   if(body.action==='reserve'||body.action==='prepareReplacement'){
     if(!UUID.test(body.requestId||'')||!['jpg','png','webp'].includes(body.extension)||!Number.isSafeInteger(body.bytes)||body.bytes<1||body.bytes>MAX_BYTES||!/^[a-f0-9]{64}$/.test(body.sha256||'')||typeof body.alt!=='string'||!body.alt.trim()||body.alt.trim().length>500||!['ai','licensed','owner_authorized'].includes(body.sourceKind)||typeof body.illustrative!=='boolean')problem('INVALID_REQUEST');
-    const row=await rowRPC(server,'nexo_service_reserve_image',{p_actor:actor,p_property:body.propertyId,p_request:body.requestId,p_extension:body.extension,p_bytes:body.bytes,p_sha256:body.sha256,p_alt:body.alt.trim(),p_source:body.sourceKind,p_illustrative:body.illustrative});
+    if(body.action==='prepareReplacement'&&!UUID.test(body.sourceImageId||''))problem('INVALID_REQUEST');
+    const args={p_actor:actor,p_property:body.propertyId,p_request:body.requestId,p_extension:body.extension,p_bytes:body.bytes,p_sha256:body.sha256,p_alt:body.alt.trim(),p_illustrative:body.illustrative};
+    if(body.action==='prepareReplacement'){args.p_source=body.sourceImageId;args.p_source_kind=body.sourceKind;}else args.p_source=body.sourceKind;
+    const row=await rowRPC(server,body.action==='prepareReplacement'?'nexo_service_prepare_replacement':'nexo_service_reserve_image',args);
     return new Response(JSON.stringify(summary(row)),{status:200,headers});
    }
    if(!UUID.test(body.imageId||''))problem('INVALID_REQUEST');
@@ -74,7 +84,8 @@ export function createImageHandler({publicClient,serverClient,codec,allowedOrigi
      let settled;try{settled=await rowRPC(server,'nexo_service_get_image',args);}catch{ /* No cleanup without a confirmed settled state. */ }
      if(settled?.processing_status==='ready'&&settled.processing_token===token)return new Response(JSON.stringify(summary(settled)),{headers});
      const safeToClean=settled&&(settled.processing_token!==token||settled.processing_status==='failed');
-     if(safeToClean&&keys.length){
+     // Replacement candidates retain even failed staged variants; cleanup is a separate task.
+     if(safeToClean&&keys.length&&row.image_active!==false){
       try{const deleted=await server.storage.from('nexo-property-images').remove(keys);if(!deleted.error)await voidRPC(server,'nexo_service_cleanup_attempt',{p_actor:actor,p_image:body.imageId,p_token:token});}catch{ /* Cleanup stays pending in the ledger. */ }
      }
     }
